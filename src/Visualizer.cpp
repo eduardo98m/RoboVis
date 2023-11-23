@@ -1,8 +1,4 @@
-// #include "rlImGui.h"	
-// #include "imgui.h"
 #include "Visualizer.hpp"
-// #define RAYGUI_IMPLEMENTATION
-// #include"raygui.h"
 
 Visualizer::Visualizer(int screen_width, int screen_height, const char* title) : 
     screen_width_(screen_width), 
@@ -15,13 +11,23 @@ Visualizer::Visualizer(int screen_width, int screen_height, const char* title) :
     
     SetTargetFPS(60);
     rlImGuiSetup(true); // Setup ImGui
+
+    this->shader_target_ = LoadRenderTexture(screen_width_, screen_height_);
 }
 
 Visualizer::~Visualizer() {
     this->close();
 }
 void Visualizer::set_up_camera() {
-    this->camera_ = { { 0.0f, 10.0f, 10.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, 45.0f, CAMERA_PERSPECTIVE };
+    this->camera_ = (Camera3D){ { 0.0f, 10.0f, 10.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, 45.0f, CAMERA_PERSPECTIVE };
+}
+
+void Visualizer::set_camera_focus() {
+    if (this->focused_object_index_ != -1) {
+        this->camera_.target = this->visual_objects_[this->focused_object_index_].position;
+        // Also set the camera position to be a bit further away from the object
+        //this->camera_.position = Vector3Add(this->visual_objects_[this->focused_object_index_].position, {0.0f, 0.0f, 10.0f});
+    }
 }
 
 uint Visualizer::add_visual_object(VisualObject vis_object) {
@@ -44,12 +50,21 @@ void Visualizer::clear_visual_objects() {
 }
 
 void Visualizer::draw_shader() {
+    if (this->shader_loaded_) {
     BeginShaderMode(this->shader_);
     // NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
     // TODO: Fix this with the camera target
 
-   // DrawTextureRec(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, (float)-target.texture.height }, (Vector2){ 0, 0 }, WHITE);
+        DrawTextureRec(this->shader_target_.texture, 
+                    (Rectangle){ 0, 0, (float)this->shader_target_.texture.width, (float)-this->shader_target_.texture.height }, 
+                    (Vector2){ 0, 0 }, WHITE);
     EndShaderMode();
+    }
+    else {
+        DrawTextureRec(this->shader_target_.texture, 
+                    (Rectangle){ 0, 0, (float)this->shader_target_.texture.width, (float)-this->shader_target_.texture.height }, 
+                    (Vector2){ 0, 0 }, WHITE);
+    }
 }
 
 void Visualizer::draw_gui() {
@@ -71,8 +86,22 @@ void Visualizer::draw_gui() {
     ImGui::Text("Wireframe mode");
     ImGui::Checkbox("Wireframe mode", &this->wireframe_mode_);
     ImGui::Separator();
-    ImGui::Text("Focused object");
-    ImGui::InputInt("Focused object index", &this->focused_object_index_);
+    // ImGui::Text("Focused object");
+    // ImGui::InputInt("Focused object index", &this->focused_object_index_);
+    // Create a drop down menu for the focused object
+    if (ImGui::BeginCombo("Focused object", TextFormat("Object %d", this->focused_object_index_))) {
+        for (int n = 0; n < this->visual_objects_.size(); n++) {
+            bool is_selected = (this->focused_object_index_ == n);
+            
+            if (ImGui::Selectable(TextFormat("Object %d", n), is_selected)) {
+                this->focused_object_index_ = n;
+            }
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
     // End the GUI
     ImGui::End();
 
@@ -85,30 +114,47 @@ void Visualizer::update(){
     // Update the camera
 
     this->draw_gui();
-	
-    UpdateCamera(&camera_, CAMERA_ORBITAL);
+
+    this->set_camera_focus();
+    UpdateCamera(&this->camera_, CAMERA_ORBITAL);
+    
 
     // Draw
-    BeginDrawing();
+    
+    BeginTextureMode(this->shader_target_);  
     // Clear the background
     ClearBackground({ 30, 30, 30, 255 } );
 
     BeginMode3D(this->camera_);
+    
     for (auto& vis_object : this->visual_objects_) {
         // Get the rotation axis and angle from the quaternion
         Vector3 axis;
         float angle;
         QuaternionToAxisAngle(vis_object.orientation, &axis, &angle);
         if (wireframe_mode_) {
-            DrawModelEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, vis_object.color);
-        } else {
             DrawModelWiresEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, vis_object.color);
+        } else {
+            DrawModelEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, vis_object.color);
+            // Draw wireframe with a small offset in the color (make it darker)
+            Color wireColor = { (unsigned char)(vis_object.color.r * 0.8f), 
+                                (unsigned char)(vis_object.color.g * 0.8f), 
+                                (unsigned char)(vis_object.color.b * 0.8f), 255 };
+            DrawModelWiresEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, wireColor);
         }
         
     }
     // Draw the axis
     DrawGrid(100, 1.0f);
-    EndMode3D();  
+    EndMode3D(); 
+    EndTextureMode();
+    
+    
+    BeginDrawing();
+    ClearBackground({ 30, 30, 30, 255 } );
+    
+    this->draw_shader();
+     
 
     // Draw the GUI
     rlImGuiEnd();  
@@ -167,6 +213,16 @@ uint Visualizer::add_plane(Vector3 position, Quaternion orientation, Color color
     return this->add_visual_object(plane_vis_object);
 }
 
+uint Visualizer::add_mesh(const char *filename, Vector3 position, Quaternion orientation, Color color, float scale) {
+    Model model = LoadModel(filename);
+    model.transform = MatrixScale(scale, scale, scale);
+    VisualObject vis_object = { 
+        position, 
+        orientation, model, color };
+    
+    return this->add_visual_object(vis_object);
+}
+
 // uint Visualizer::add_heightmap(Vector3 position, Quaternion orientation, Color color, std::vector<std::vector<float>> heightmap) {
 //     Mesh heightmap_mesh = GenMeshHeightmap(heightmap, 1.0f, 1.0f, 1.0f);
 //     Model heightmap_model = LoadModelFromMesh(heightmap_mesh);
@@ -177,6 +233,12 @@ uint Visualizer::add_plane(Vector3 position, Quaternion orientation, Color color
 //     return this->add_visual_object(heightmap_vis_object);
 // }
 
+void Visualizer::load_shader(const char* filename){
+    this->shader_ = LoadShader(0, TextFormat(filename, GLSL_VERSION));
+    // Print the GSL version using stderror
+    std::cerr << GLSL_VERSION << std::endl;
+    this->shader_loaded_ = true;
+}
 
 void Visualizer::close() {
     // Unload all the models
@@ -184,5 +246,6 @@ void Visualizer::close() {
         UnloadModel(vis_object.model);
     }
     rlImGuiShutdown();
+    UnloadRenderTexture(this->shader_target_);
     CloseWindow();
 }

@@ -12,6 +12,10 @@ int main() {
     uint cylinder_id = visualizer.add_cylinder({1.0f, 0.0f, 0.0f}, QuaternionIdentity(), GREEN, 1.0f, 2.0f);
     uint cone_id = visualizer.add_cone({-1.0f, 0.0f, 0.0f}, QuaternionIdentity(), YELLOW, 1.0f, 2.0f);
     uint plane = visualizer.add_plane({0.0f, -1.0f, 0.0f}, QuaternionIdentity(), WHITE, 10.0f, 10.0f); 
+
+    uint monkey_id = visualizer.add_mesh("../resources/models/monkey.obj", {0.0f, 1.0f, 1.0f}, QuaternionIdentity(), RED, 1.0f);
+
+    //visualizer.load_shader("../resources/shaders/blur.fs");
     
     // Define the sphere
     Vector3 new_pos = {0.0f, 0.0f, 0.0f};

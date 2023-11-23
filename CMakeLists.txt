@@ -5,6 +5,7 @@ project(RoboVis)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
+
 find_package(raylib REQUIRED)
 
 include_directories("src" "thirdParty/rlImGui" "thirdParty/imgui")
