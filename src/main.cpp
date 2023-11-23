@@ -1,31 +1,22 @@
 #include "raylib.h"
 #include "Visualizer.hpp"
-
+#include <memory>
 int main() {
     // Initialize the visualizer
-    Visualizer visualizer(800, 600, "RoboVis");
+    Visualizer visualizer(1208, 720, "RoboVis");
 
     // Set up the camera
     visualizer.set_up_camera();
 
-    // Define the cube
-    Mesh cube_mesh = GenMeshCube(1.0f, 1.0f, 1.0f);
-    Model cube = LoadModelFromMesh(cube_mesh);
-    VisualObject cube_vis_object = { 
-        { 0.0f, 0.0f, 0.0f }, 
-        QuaternionIdentity(), cube, RED };
+    uint sphere_id = visualizer.add_sphere({0.0f, 2.0f, 0.0f}, QuaternionIdentity(), BLUE, 1.0f);
+    uint cylinder_id = visualizer.add_cylinder({1.0f, 0.0f, 0.0f}, QuaternionIdentity(), GREEN, 1.0f, 2.0f);
+    uint cone_id = visualizer.add_cone({-1.0f, 0.0f, 0.0f}, QuaternionIdentity(), YELLOW, 1.0f, 2.0f);
+    uint plane = visualizer.add_plane({0.0f, -1.0f, 0.0f}, QuaternionIdentity(), WHITE, 10.0f, 10.0f); 
     
     // Define the sphere
-    Mesh sphere_mesh = GenMeshSphere(1.0f, 16, 16);
-    Model sphere = LoadModelFromMesh(sphere_mesh);
-    VisualObject sphere_vis_object = { 
-        { 0.0f, 2.0f, 0.0f }, 
-        QuaternionIdentity(), sphere, BLUE };
-    // Add the visual objects
-    uint cube_id = visualizer.add_visual_object(cube_vis_object);
-    uint sphere_id = visualizer.add_visual_object(sphere_vis_object);
-    Vector3 new_pos = { 0.0f, 2.0f, 0.0f };
+    Vector3 new_pos = {0.0f, 0.0f, 0.0f};
     Quaternion new_orientation = QuaternionIdentity();
+    uint cube_id = visualizer.add_cube(new_pos, QuaternionIdentity(), RED, 1.0, 1.0, 1.0);
     SetTargetFPS(60);
     // Main game loop
     while (!WindowShouldClose()) {
