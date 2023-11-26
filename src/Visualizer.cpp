@@ -41,6 +41,16 @@ void Visualizer::update_visual_object_position_orientation(uint index, Vector3 p
     this->visual_objects_[index].orientation = orientation;
 }
 
+void Visualizer::update_visual_object_position_orientation_scale(uint index, Vector3 position, Quaternion orientation, Vector3 scale) {
+    this->visual_objects_[index].position = position;
+    this->visual_objects_[index].orientation = orientation;
+    this->visual_objects_[index].model.transform = MatrixScale(scale.x, scale.y, scale.z);
+}
+
+void Visualizer::update_visual_object_scale(uint index, Vector3 scale) {
+    this->visual_objects_[index].model.transform = MatrixScale(scale.x, scale.y, scale.z);
+}
+
 void Visualizer::remove_visual_object(uint index) {
     this->visual_objects_.erase(this->visual_objects_.begin() + index);
 }
@@ -51,13 +61,14 @@ void Visualizer::clear_visual_objects() {
 
 void Visualizer::draw_shader() {
     if (this->shader_loaded_) {
-    BeginShaderMode(this->shader_);
-    // NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
-    // TODO: Fix this with the camera target
+        BeginShaderMode(this->shader_);
+        // NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
+        // TODO: Fix this with the camera target
 
         DrawTextureRec(this->shader_target_.texture, 
                     (Rectangle){ 0, 0, (float)this->shader_target_.texture.width, (float)-this->shader_target_.texture.height }, 
                     (Vector2){ 0, 0 }, WHITE);
+        
     EndShaderMode();
     }
     else {
@@ -118,7 +129,6 @@ void Visualizer::update(){
     this->set_camera_focus();
     UpdateCamera(&this->camera_, CAMERA_ORBITAL);
     
-
     // Draw
     
     BeginTextureMode(this->shader_target_);  
@@ -232,11 +242,27 @@ uint Visualizer::add_mesh(const char *filename, Vector3 position, Quaternion ori
     
 //     return this->add_visual_object(heightmap_vis_object);
 // }
+void Visualizer::set_up_lighting() {
+    this->light_ = CreateLight(LIGHT_DIRECTIONAL, (Vector3){ 0.0f, 3.0f, 0.0f }, Vector3Zero(), WHITE, this->shader_);
 
-void Visualizer::load_shader(const char* filename){
-    this->shader_ = LoadShader(0, TextFormat(filename, GLSL_VERSION));
-    // Print the GSL version using stderror
-    std::cerr << GLSL_VERSION << std::endl;
+    this->shader_.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(this->shader_, "viewPos");
+    
+    // Ambient light level (some basic lighting)
+    int ambientLoc = GetShaderLocation(this->shader_, "ambient");
+    Vector4 ambient = { 1.0f, 1.0f, 1.0f, 1.0f };  // Use Vector4 for ambient light
+    SetShaderValue(this->shader_, ambientLoc, &ambient, SHADER_UNIFORM_VEC4);
+
+    // Assign out lighting shader to model
+
+    for (auto& vis_object : this->visual_objects_) {
+        vis_object.model.materials[0].shader = this->shader_;
+    }
+
+}
+
+
+void Visualizer::load_shader(const char* filename_vs, const char* filename_fs){
+    this->shader_ = LoadShader(TextFormat(filename_vs, GLSL_VERSION), TextFormat(filename_fs, GLSL_VERSION));
     this->shader_loaded_ = true;
 }
 

@@ -3,8 +3,9 @@
 #include<raylib.h>
 #include<raymath.h>
 #include<vector>
-#include "rlImGui.h"	
-#include "imgui.h"
+#include"rlImGui.h"	
+#include"imgui.h"
+#include"rlights.hpp"
 #include<iostream>
 
 #define GLSL_VERSION            330
@@ -14,6 +15,7 @@ struct VisualObject {
     Quaternion orientation;
     Model model;
     Color color; 
+    uint group_id = 0;
 };
 
 class Visualizer {
@@ -28,6 +30,7 @@ class Visualizer {
         bool wireframe_mode_;
         int focused_object_index_;
         RenderTexture2D shader_target_;
+        Light light_;
 
     public:
         Visualizer(int screen_width, int screen_height, const char* title);
@@ -39,12 +42,16 @@ class Visualizer {
         // Camera
         void set_up_camera();
         void set_camera_focus();
+        // Lighting
+        void set_up_lighting();
         // Shader
         // filename -> path to the shader file (.fs)
-        void load_shader(const char* filename);
+        void load_shader(const char* filename_fs, const char* filename_vs);
         //--------------------//
         uint add_visual_object(VisualObject vis_object);
+        void update_visual_object_position_orientation_scale(uint index, Vector3 position, Quaternion orientation, Vector3 scale);
         void update_visual_object_position_orientation(uint index, Vector3 position, Quaternion orientation);
+        void update_visual_object_scale(uint index, Vector3 scale);
         void remove_visual_object(uint index);
         void clear_visual_objects();
         // Functions to draw geometric primitives
@@ -55,6 +62,7 @@ class Visualizer {
         uint add_plane(Vector3 position, Quaternion orientation, Color color, float width, float length);
         //uint add_heightmap(Vector3 position, Quaternion orientation, Color color, std::vector<std::vector<float>> heightmap);
         uint add_mesh(const char *filename, Vector3 position, Quaternion orientation, Color color, float scale);
+        
 
 
 };

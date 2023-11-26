@@ -8,7 +8,10 @@ set(CMAKE_CXX_STANDARD 17)
 
 find_package(raylib REQUIRED)
 
-include_directories("src" "thirdParty/rlImGui" "thirdParty/imgui")
+include_directories("src" "thirdParty/rlImGui" "thirdParty/imgui" "thirdParty/rlights")
+
+SET(RLIGHTS_SOURCES
+    thirdParty/rlights/rlights.cpp)
 
 set(IMGUI_SOURCES
     thirdParty/imgui/imgui.cpp
@@ -23,13 +26,25 @@ set(RAYMGUI_SOURCES
     thirdParty/rlImGui/rlImGui.cpp
 )
 
+set(ROBO_VIS_SOURCES
+    src/Visualizer.cpp
+)
+
+
 set(SOURCES
     src/main.cpp
     src/Visualizer.cpp
 )
 
+set(EXAMPLE_SOURCES
+    examples/SpringMassSimulation.cpp
+)
 
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${IMGUI_SOURCES} ${RAYMGUI_SOURCES})
+
+add_executable(${PROJECT_NAME} ${SOURCES} ${IMGUI_SOURCES} ${RAYMGUI_SOURCES} ${RLIGHTS_SOURCES})
+
+add_executable(SpringMassSimulation ${EXAMPLE_SOURCES} ${ROBO_VIS_SOURCES} ${IMGUI_SOURCES} ${RAYMGUI_SOURCES} ${RLIGHTS_SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
+target_link_libraries(SpringMassSimulation PRIVATE raylib)

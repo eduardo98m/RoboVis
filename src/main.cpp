@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include "Visualizer.hpp"
+#include "rlights.hpp"
 #include <memory>
 int main() {
     // Initialize the visualizer
@@ -7,6 +8,7 @@ int main() {
 
     // Set up the camera
     visualizer.set_up_camera();
+    
 
     uint sphere_id = visualizer.add_sphere({0.0f, 2.0f, 0.0f}, QuaternionIdentity(), BLUE, 1.0f);
     uint cylinder_id = visualizer.add_cylinder({1.0f, 0.0f, 0.0f}, QuaternionIdentity(), GREEN, 1.0f, 2.0f);
@@ -15,7 +17,8 @@ int main() {
 
     uint monkey_id = visualizer.add_mesh("../resources/models/monkey.obj", {0.0f, 1.0f, 1.0f}, QuaternionIdentity(), RED, 1.0f);
 
-    //visualizer.load_shader("../resources/shaders/blur.fs");
+    //visualizer.load_shader("../resources/shaders/lighting.vs" , "../resources/shaders/lighting.fs");
+    //visualizer.set_up_lighting();
     
     // Define the sphere
     Vector3 new_pos = {0.0f, 0.0f, 0.0f};
