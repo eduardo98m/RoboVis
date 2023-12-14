@@ -30,9 +30,7 @@ set(ROBO_VIS_SOURCES
     src/Visualizer.cpp
 )
 
-
 set(SOURCES
-    src/main.cpp
     src/Visualizer.cpp
 )
 
@@ -40,11 +38,10 @@ set(EXAMPLE_SOURCES
     examples/SpringMassSimulation.cpp
 )
 
-
-
-add_executable(${PROJECT_NAME} ${SOURCES} ${IMGUI_SOURCES} ${RAYMGUI_SOURCES} ${RLIGHTS_SOURCES})
+add_library(${PROJECT_NAME} ${SOURCES} ${IMGUI_SOURCES} ${RAYMGUI_SOURCES} ${RLIGHTS_SOURCES})
 
 add_executable(SpringMassSimulation ${EXAMPLE_SOURCES} ${ROBO_VIS_SOURCES} ${IMGUI_SOURCES} ${RAYMGUI_SOURCES} ${RLIGHTS_SOURCES})
+
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
 target_link_libraries(SpringMassSimulation PRIVATE raylib)
