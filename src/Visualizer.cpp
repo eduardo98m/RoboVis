@@ -210,6 +210,7 @@ void Visualizer::update()
         Vector3 axis;
         float angle;
         QuaternionToAxisAngle(vis_object.orientation, &axis, &angle);
+        angle  = angle * 180/3.1415926535;
         if (wireframe_mode_)
         {
             DrawModelWiresEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, vis_object.color);
@@ -225,7 +226,7 @@ void Visualizer::update()
         }
     }
     // Draw the axis
-    // DrawGrid(100, 1.0f);
+    DrawGrid(100, 1.0f);
     EndMode3D();
     EndTextureMode();
 
