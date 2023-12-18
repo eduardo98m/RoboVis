@@ -16,7 +16,7 @@ int main() {
     Vector3 pos = {0.0f, -2.0f, 0.0f};
     Vector3 vel = {0.0f, 0.0f, 0.0f};
     // Create a box which will be the mass
-    uint box_id =  visualizer.add_cube(pos, QuaternionIdentity(), RED, 1.0, 1.0, 1.0);
+    uint box_id =  visualizer.add_box(pos, QuaternionIdentity(), RED, 1.0, 1.0, 1.0);
 
 
     Vector3 ref_pos = {0.0f, 4.0f, 0.0f};

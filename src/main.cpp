@@ -23,7 +23,7 @@ int main() {
     // Define the sphere
     Vector3 new_pos = {0.0f, 0.0f, 0.0f};
     Quaternion new_orientation = QuaternionIdentity();
-    uint cube_id = visualizer.add_cube(new_pos, QuaternionIdentity(), RED, 1.0, 1.0, 1.0);
+    uint cube_id = visualizer.add_box(new_pos, QuaternionIdentity(), RED, 1.0, 1.0, 1.0);
     SetTargetFPS(60);
     // Main game loop
     while (!WindowShouldClose()) {

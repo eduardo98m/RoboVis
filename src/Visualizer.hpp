@@ -19,7 +19,7 @@ struct VisualObject
     Quaternion orientation; // Orientation of the visual object.
     Model model;            // Model associated with the visual object.
     Color color;            // Color of the visual object.
-    uint group_id = 0;      // Group ID to which the visual object belongs.
+    int group_id = 0;      // Group ID to which the visual object belongs.
 };
 
 /**
@@ -112,7 +112,7 @@ public:
      * @param vis_object The visual object to be added.
      * @return The index of the added visual object.
      */
-    uint add_visual_object(VisualObject vis_object);
+    int add_visual_object(VisualObject vis_object);
 
     /**
      * @brief Updates the position, orientation, and scale of a visual object.
@@ -121,7 +121,7 @@ public:
      * @param orientation New orientation of the visual object.
      * @param scale New scale of the visual object.
      */
-    void update_visual_object_position_orientation_scale(uint index, Vector3 position, Quaternion orientation, Vector3 scale);
+    void update_visual_object_position_orientation_scale(int index, Vector3 position, Quaternion orientation, Vector3 scale);
 
     /**
      * @brief Updates the position and orientation of a visual object.
@@ -129,20 +129,20 @@ public:
      * @param position New position of the visual object.
      * @param orientation New orientation of the visual object.
      */
-    void update_visual_object_position_orientation(uint index, Vector3 position, Quaternion orientation);
+    void update_visual_object_position_orientation(int index, Vector3 position, Quaternion orientation);
 
     /**
      * @brief Updates the scale of a visual object.
      * @param index Index of the visual object to be updated.
      * @param scale New scale of the visual object.
      */
-    void update_visual_object_scale(uint index, Vector3 scale);
+    void update_visual_object_scale(int index, Vector3 scale);
 
     /**
      * @brief Removes a visual object from the scene.
      * @param index Index of the visual object to be removed.
      */
-    void remove_visual_object(uint index);
+    void remove_visual_object(int index);
 
     /**
      * @brief Clears all visual objects from the scene.
@@ -161,7 +161,7 @@ public:
      * @param length Length of the cube.
      * @return The index of the added cube.
      */
-    uint add_cube(Vector3 position, Quaternion orientation, Color color, float width, float height, float length);
+    int add_box(Vector3 position, Quaternion orientation, Color color, float width, float height, float length);
 
     /**
      * @brief Adds a sphere to the scene.
@@ -171,7 +171,7 @@ public:
      * @param radius Radius of the sphere.
      * @return The index of the added sphere.
      */
-    uint add_sphere(Vector3 position, Quaternion orientation, Color color, float radius);
+    int add_sphere(Vector3 position, Quaternion orientation, Color color, float radius);
 
     /**
      * @brief Adds a cylinder to the scene.
@@ -182,7 +182,7 @@ public:
      * @param height Height of the cylinder.
      * @return The index of the added cylinder.
      */
-    uint add_cylinder(Vector3 position, Quaternion orientation, Color color, float radius, float height);
+    int add_cylinder(Vector3 position, Quaternion orientation, Color color, float radius, float height);
 
     /**
      * @brief Adds a cone to the scene.
@@ -193,7 +193,7 @@ public:
      * @param height Height of the cone.
      * @return The index of the added cone.
      */
-    uint add_cone(Vector3 position, Quaternion orientation, Color color, float radius, float height);
+    int add_cone(Vector3 position, Quaternion orientation, Color color, float radius, float height);
 
     /**
      * @brief Adds a plane to the scene.
@@ -204,10 +204,10 @@ public:
      * @param length Length of the plane.
      * @return The index of the added plane.
      */
-    uint add_plane(Vector3 position, Quaternion orientation, Color color, float width, float length);
+    int add_plane(Vector3 position, Quaternion orientation, Color color, float width, float length);
 
     // Uncomment the following line when the heightmap function is implemented.
-    // uint add_heightmap(Vector3 position, Quaternion orientation, Color color, std::vector<std::vector<float>> heightmap);
+    // int add_heightmap(Vector3 position, Quaternion orientation, Color color, std::vector<std::vector<float>> heightmap);
 
     /**
      * @brief Adds a mesh to the scene.
@@ -218,5 +218,5 @@ public:
      * @param scale Scale of the mesh.
      * @return The index of the added mesh.
      */
-    uint add_mesh(const char *filename, Vector3 position, Quaternion orientation, Color color, float scale);
+    int add_mesh(const char *filename, Vector3 position, Quaternion orientation, Color color, float scale);
 };

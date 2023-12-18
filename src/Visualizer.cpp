@@ -31,32 +31,32 @@ void Visualizer::set_camera_focus()
     }
 }
 
-uint Visualizer::add_visual_object(VisualObject vis_object)
+int Visualizer::add_visual_object(VisualObject vis_object)
 {
     this->visual_objects_.push_back(vis_object);
 
     return this->visual_objects_.size() - 1;
 }
 
-void Visualizer::update_visual_object_position_orientation(uint index, Vector3 position, Quaternion orientation)
+void Visualizer::update_visual_object_position_orientation(int index, Vector3 position, Quaternion orientation)
 {
     this->visual_objects_[index].position = position;
     this->visual_objects_[index].orientation = orientation;
 }
 
-void Visualizer::update_visual_object_position_orientation_scale(uint index, Vector3 position, Quaternion orientation, Vector3 scale)
+void Visualizer::update_visual_object_position_orientation_scale(int index, Vector3 position, Quaternion orientation, Vector3 scale)
 {
     this->visual_objects_[index].position = position;
     this->visual_objects_[index].orientation = orientation;
     this->visual_objects_[index].model.transform = MatrixScale(scale.x, scale.y, scale.z);
 }
 
-void Visualizer::update_visual_object_scale(uint index, Vector3 scale)
+void Visualizer::update_visual_object_scale(int index, Vector3 scale)
 {
     this->visual_objects_[index].model.transform = MatrixScale(scale.x, scale.y, scale.z);
 }
 
-void Visualizer::remove_visual_object(uint index)
+void Visualizer::remove_visual_object(int index)
 {
     this->visual_objects_.erase(this->visual_objects_.begin() + index);
 }
@@ -241,7 +241,7 @@ void Visualizer::update()
 }
 
 // Functions to draw geometric primitives
-uint Visualizer::add_cube(Vector3 position, Quaternion orientation, Color color, float width, float height, float length)
+int Visualizer::add_box(Vector3 position, Quaternion orientation, Color color, float width, float height, float length)
 {
     Mesh cube_mesh = GenMeshCube(width, height, length);
     Model cube = LoadModelFromMesh(cube_mesh);
@@ -252,7 +252,7 @@ uint Visualizer::add_cube(Vector3 position, Quaternion orientation, Color color,
     return this->add_visual_object(cube_vis_object);
 }
 
-uint Visualizer::add_sphere(Vector3 position, Quaternion orientation, Color color, float radius)
+int Visualizer::add_sphere(Vector3 position, Quaternion orientation, Color color, float radius)
 {
     Mesh sphere_mesh = GenMeshSphere(radius, 16, 16);
     Model sphere = LoadModelFromMesh(sphere_mesh);
@@ -263,7 +263,7 @@ uint Visualizer::add_sphere(Vector3 position, Quaternion orientation, Color colo
     return this->add_visual_object(sphere_vis_object);
 }
 
-uint Visualizer::add_cylinder(Vector3 position, Quaternion orientation, Color color, float radius, float height)
+int Visualizer::add_cylinder(Vector3 position, Quaternion orientation, Color color, float radius, float height)
 {
     Mesh cylinder_mesh = GenMeshCylinder(radius, height, 16);
     Model cylinder = LoadModelFromMesh(cylinder_mesh);
@@ -274,7 +274,7 @@ uint Visualizer::add_cylinder(Vector3 position, Quaternion orientation, Color co
     return this->add_visual_object(cylinder_vis_object);
 }
 
-uint Visualizer::add_cone(Vector3 position, Quaternion orientation, Color color, float radius, float height)
+int Visualizer::add_cone(Vector3 position, Quaternion orientation, Color color, float radius, float height)
 {
     Mesh cone_mesh = GenMeshCone(radius, height, 16);
     Model cone = LoadModelFromMesh(cone_mesh);
@@ -285,7 +285,7 @@ uint Visualizer::add_cone(Vector3 position, Quaternion orientation, Color color,
     return this->add_visual_object(cone_vis_object);
 }
 
-uint Visualizer::add_plane(Vector3 position, Quaternion orientation, Color color, float width, float length)
+int Visualizer::add_plane(Vector3 position, Quaternion orientation, Color color, float width, float length)
 {
     Mesh plane_mesh = GenMeshPlane(width, length, 16, 16);
     Model plane = LoadModelFromMesh(plane_mesh);
@@ -296,7 +296,7 @@ uint Visualizer::add_plane(Vector3 position, Quaternion orientation, Color color
     return this->add_visual_object(plane_vis_object);
 }
 
-uint Visualizer::add_mesh(const char *filename, Vector3 position, Quaternion orientation, Color color, float scale)
+int Visualizer::add_mesh(const char *filename, Vector3 position, Quaternion orientation, Color color, float scale)
 {
     Model model = LoadModel(filename);
     model.transform = MatrixScale(scale, scale, scale);
@@ -307,7 +307,7 @@ uint Visualizer::add_mesh(const char *filename, Vector3 position, Quaternion ori
     return this->add_visual_object(vis_object);
 }
 
-// uint Visualizer::add_heightmap(Vector3 position, Quaternion orientation, Color color, std::vector<std::vector<float>> heightmap) {
+// int Visualizer::add_heightmap(Vector3 position, Quaternion orientation, Color color, std::vector<std::vector<float>> heightmap) {
 //     Mesh heightmap_mesh = GenMeshHeightmap(heightmap, 1.0f, 1.0f, 1.0f);
 //     Model heightmap_model = LoadModelFromMesh(heightmap_mesh);
 //     VisualObject heightmap_vis_object = {
