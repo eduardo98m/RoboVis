@@ -3,8 +3,10 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <vector>
+#include <queue>
 #include "rlImGui.h"
 #include "imgui.h"
+#include "raymath.h"
 #include "rlights.hpp"
 #include <iostream>
 
@@ -19,7 +21,31 @@ struct VisualObject
     Quaternion orientation; // Orientation of the visual object.
     Model model;            // Model associated with the visual object.
     Color color;            // Color of the visual object.
-    int group_id = 0;      // Group ID to which the visual object belongs.
+    int group_id = 0;       // Group ID to which the visual object belongs.
+};
+
+struct Line
+{
+    Vector3 start_pos; // Start position of the line
+    Vector3 end_pos;   // End position of the line
+    Color color;       // Color of the line
+};
+
+struct Point
+{
+    Vector3 position;
+    Color color;
+};
+
+struct TextLabel{
+    const char *text;
+    Vector3 position;
+    float fontSize = 500.0;
+    Color color = WHITE;
+    Font font = GetFontDefault();
+    bool background;
+    Color backgroundColor = BLACK;  
+    bool enabled = true;
 };
 
 /**
@@ -28,17 +54,23 @@ struct VisualObject
 class Visualizer
 {
 private:
-    const int screen_width_;                   // Screen width for visualization.
-    const int screen_height_;                  // Screen height for visualization.
-    const char *title_;                        // Title of the visualization window.
-    Camera camera_;                            // Camera for viewing the scene.
-    Shader shader_;                            // Shader used for rendering.
-    bool shader_loaded_ = false;               // Flag indicating whether the shader is loaded.
-    std::vector<VisualObject> visual_objects_; // List of visual objects in the scene.
-    bool wireframe_mode_;                      // Flag indicating whether to render in wireframe mode.
-    int focused_object_index_;                 // Index of the focused visual object.
-    RenderTexture2D shader_target_;            // Render target for shaders.
-    Light light_;                              // Lighting setup for the scene.
+    const int screen_width_;                            // Screen width for visualization.
+    const int screen_height_;                           // Screen height for visualization.
+    const char *title_;                                 // Title of the visualization window.
+    Camera camera_;      // Camera for viewing the scene.
+    Shader shader_;                                     // Shader used for rendering.
+    bool shader_loaded_ = false;                        // Flag indicating whether the shader is loaded.
+    std::vector<VisualObject> visual_objects_;          // List of visual objects in the scene.
+    std::vector<Point> points_;
+    std::queue<Line> lines_;
+    std::vector<TextLabel> text_labels_;
+    bool wireframe_mode_;      // Flag indicating whether to render in wireframe mode.
+    int focused_object_index_; // Index of the focused visual object.
+    int previously_focused_object_index_ = -2;
+    bool focus_mode_ = false;
+    RenderTexture2D shader_target_; // Render target for shaders.
+    Light light_;                   // Lighting setup for the scene.
+    bool show_bodies_coordinate_frame_ = false;
 
 public:
     /**
@@ -219,4 +251,26 @@ public:
      * @return The index of the added mesh.
      */
     int add_mesh(const char *filename, Vector3 position, Quaternion orientation, Color color, float scale);
+
+    // Helper drawing functions:
+    // This set of functions purposes are to let the user draw visual indicators:
+    // * Lines, Text
+
+    /**
+     *
+     */
+
+    void draw_line(Vector3 start_pos, Vector3 end_pos, Color color = WHITE);
+
+    // int add_point()
+
+    void draw_text_label(TextLabel label);
+
+    int add_text_label(const char *text, Vector3 position, float font_size = 500.0, bool background = true, Color color  = WHITE, Font font = GetFontDefault(), Color background_color = BLACK);
+
+    void modify_text_label(int index, const char *text);
+
+    void modify_text_label(int index, std::string text);
+
+    void modify_text_position(int index, Vector3 position);
 };

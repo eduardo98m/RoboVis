@@ -4,13 +4,13 @@ Visualizer::Visualizer(int screen_width, int screen_height, const char *title) :
                                                                                  screen_height_(screen_height),
                                                                                  title_(title),
                                                                                  wireframe_mode_(false),
-                                                                                 focused_object_index_(-1)
+                                                                                 focused_object_index_(0)
 {
     InitWindow(screen_width_, screen_height_, title_);
 
     SetTargetFPS(60);
     rlImGuiSetup(true); // Setup ImGui
-
+    this->set_up_camera();
     this->shader_target_ = LoadRenderTexture(screen_width_, screen_height_);
 }
 
@@ -25,9 +25,12 @@ void Visualizer::set_up_camera()
 
 void Visualizer::set_camera_focus()
 {
-    if (this->focused_object_index_ != -1)
+    this->focus_mode_ = (this->previously_focused_object_index_ != this->focused_object_index_ || this->focus_mode_);
+    if (this->focus_mode_)
     {
         this->camera_.target = this->visual_objects_[this->focused_object_index_].position;
+        this->previously_focused_object_index_ = this->focused_object_index_;
+        this->focus_mode_ = true;
     }
 }
 
@@ -101,12 +104,13 @@ void Visualizer::draw_gui()
     ImGui::Text("Position: (%f, %f, %f)", this->camera_.position.x, this->camera_.position.y, this->camera_.position.z);
     ImGui::Text("Target: (%f, %f, %f)", this->camera_.target.x, this->camera_.target.y, this->camera_.target.z);
     ImGui::Text("Up: (%f, %f, %f)", this->camera_.up.x, this->camera_.up.y, this->camera_.up.z);
-    ImGui::Text("FOV: %f", this->camera_.fovy);
+    ImGui::SliderFloat("FOV", &this->camera_.fovy, 6, 120);
     ImGui::Separator();
     ImGui::Text("Visual Objects");
     ImGui::Separator();
     ImGui::Text("Wireframe mode");
     ImGui::Checkbox("Wireframe mode", &this->wireframe_mode_);
+    ImGui::Checkbox("Show Frames", &this->show_bodies_coordinate_frame_);
     ImGui::Separator();
     // ImGui::Text("Focused object");
     // ImGui::InputInt("Focused object index", &this->focused_object_index_);
@@ -187,30 +191,65 @@ void Visualizer::update_camera()
         SetMousePosition(GetScreenWidth() / 2, GetScreenHeight() / 2);
     }
 
+    if (!Vector3Equals(rotation, {0.0, 0.0, 0.0}))
+        this->focus_mode_ = false;
+
     // Update the camera
     UpdateCameraPro(&(this->camera_), movement, rotation, 0.0f);
 }
 
+void draw_arrow(Vector3 start_position, Vector3 end_position, Color color, float radius)
+{
+
+    Vector3 dir_vector = Vector3Subtract(end_position, start_position);
+    Vector3 tip_start_pos = Vector3Add(start_position, Vector3Scale(dir_vector, 0.9));
+    float distance = Vector3Distance(start_position, end_position);
+
+    // DrawCylinder(start_position, radius, radius, distance * 0.9, 20, color);
+    DrawCylinderEx(start_position, tip_start_pos, radius, radius, 10, color);
+    DrawCylinderEx(tip_start_pos, end_position, radius * 2.0, 0.01 * radius, 20, color);
+    // DrawCylinder(tip_start_pos, 0.01 * radius, radius * 1.25, distance*0.1, 20, color);
+}
+
+void draw_axes(Vector3 position, Quaternion orientation)
+{
+    float lenght = 1.0;
+    float radius = lenght * 0.03;
+    orientation = QuaternionNormalize(orientation);
+    draw_arrow(position, Vector3Add(position, Vector3RotateByQuaternion({lenght, 0.0, 0.0}, orientation)), RED, radius);
+    draw_arrow(position, Vector3Add(position, Vector3RotateByQuaternion({0.0, lenght, 0.0}, orientation)), GREEN, radius);
+    draw_arrow(position, Vector3Add(position, Vector3RotateByQuaternion({0.0, 0.0, lenght}, orientation)), BLUE, radius);
+}
 void Visualizer::update()
 {
 
     // Update the camera
     this->update_camera();
+    this->set_camera_focus();
 
     // Draw
     BeginTextureMode(this->shader_target_);
     // Clear the background
     ClearBackground({30, 30, 30, 255});
+    // Draw the axis
 
     BeginMode3D(this->camera_);
+    DrawGrid(100, 1.0f);
+    EndMode3D();
 
+    for (TextLabel label : this->text_labels_)
+    {
+        this->draw_text_label(label);
+    }
+
+    BeginMode3D(this->camera_);
     for (auto &vis_object : this->visual_objects_)
     {
         // Get the rotation axis and angle from the quaternion
         Vector3 axis;
         float angle;
         QuaternionToAxisAngle(vis_object.orientation, &axis, &angle);
-        angle  = angle * 180/3.1415926535;
+        angle = angle * 180 / 3.1415926535;
         if (wireframe_mode_)
         {
             DrawModelWiresEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, vis_object.color);
@@ -224,20 +263,87 @@ void Visualizer::update()
                                (unsigned char)(vis_object.color.b * 0.9f), 255};
             DrawModelWiresEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, wireColor);
         }
+
+        if (this->show_bodies_coordinate_frame_)
+        {
+            draw_axes(vis_object.position, vis_object.orientation);
+        }
     }
-    // Draw the axis
-    DrawGrid(100, 1.0f);
+
+    // Draw The lines
+    while (!this->lines_.empty())
+    {
+        Line line = this->lines_.front();
+        DrawLine3D(line.start_pos, line.end_pos, line.color);
+        this->lines_.pop();
+    }
+
     EndMode3D();
     EndTextureMode();
 
     BeginDrawing();
-    ClearBackground({30, 30, 30, 255});
-
     this->draw_shader();
-    this->draw_gui();
     // Draw the GUI
-
+    this->draw_gui();
     EndDrawing();
+}
+
+void Visualizer::draw_text_label(TextLabel label)
+{
+    float distance = Vector3Distance(label.position, this->camera_.position);
+    Vector2 screenPosition = GetWorldToScreen(label.position, this->camera_);
+
+    // const char * text = std::string(label.text) + " " + std::string(distance);
+
+    // Adjust text size based on the distance
+    float text_size = (label.fontSize / distance);
+
+    Vector2 text_dim = MeasureTextEx(label.font, label.text, text_size, text_size * 0.3);
+
+    Vector2 background_pos = screenPosition;
+    background_pos.x = screenPosition.x - text_dim.x * 0.05;
+    background_pos.y = screenPosition.y - text_dim.y * 0.05;
+    text_dim.x = text_dim.x * 1.10;
+    text_dim.y = text_dim.y * 1.10;
+
+    // int backgroundHeight = text_dim.y;
+    // DrawRectangle(screenPosition.x, screenPosition.y, backgroundWidth, backgroundHeight, BLACK);
+
+    DrawRectangleV(background_pos, text_dim, BLACK);
+    DrawTextEx(label.font, label.text, screenPosition, text_size, text_size * 0.3, WHITE);
+}
+
+int Visualizer::add_text_label(const char *text, Vector3 position, float font_size, bool background, Color color, Font font, Color background_color)
+{
+
+    TextLabel label = {
+        text, //+ (int)this->camera_.target.x,
+        position,
+        font_size,
+        color,
+        font,
+        background,
+        background_color,
+        true};
+
+    this->text_labels_.push_back(label);
+
+    return this->text_labels_.size() - 1;
+}
+
+void Visualizer::modify_text_label(int index, const char *text)
+{
+    this->text_labels_[index].text = text;
+}
+
+void Visualizer::modify_text_label(int index, std::string text)
+{
+    this->text_labels_[index].text = text.c_str();
+}
+
+void Visualizer::modify_text_position(int index, Vector3 position)
+{
+    this->text_labels_[index].position = position;
 }
 
 // Functions to draw geometric primitives
@@ -305,6 +411,15 @@ int Visualizer::add_mesh(const char *filename, Vector3 position, Quaternion orie
         orientation, model, color};
 
     return this->add_visual_object(vis_object);
+}
+
+void Visualizer::draw_line(Vector3 start_pos, Vector3 end_pos, Color color)
+{
+    Line line = {
+        start_pos,
+        end_pos,
+        color};
+    this->lines_.push(line);
 }
 
 // int Visualizer::add_heightmap(Vector3 position, Quaternion orientation, Color color, std::vector<std::vector<float>> heightmap) {

@@ -46,6 +46,12 @@ int main() {
 
     float poison_ratio = 0.3f;
 
+    // visualizer.add_line({0, 0,0} , {2.0, 1.0, -1.0}, BLUE);
+    // visualizer.add_line({2.0, 1.0, -1.-0} , {4.0, 1.0, -1.0}, RED);
+    
+
+    int text_label = visualizer.add_text_label("meme", pos, 400);
+
     while (!WindowShouldClose()) {
 
         // Calculate the acceleration
@@ -58,7 +64,7 @@ int main() {
         // Update the force of the spring
         F_s = -k * (pos.y - x_e);
         F_d = -c * vel.y;
-
+        visualizer.draw_line({4.0, 1.0, -1.-0} , {5.0, 6.0, -2.0}, BLUE);
         // We need to update the position of the spring and its scale
         // The position of the spring is the average of the position of the mass and the reference point
         spring_pos.y = pos.y; //(pos.y + ref_pos.y) / 2.0f;
@@ -75,6 +81,9 @@ int main() {
         // Update the position and scale of the spring
         visualizer.update_visual_object_position_orientation_scale(spring_id, spring_pos, QuaternionIdentity(), spring_scale);
 
+        std::string text = std::to_string(F_d); 
+        visualizer.modify_text_label(text_label, text);
+        visualizer.modify_text_position(text_label, pos);
         // Update the position of the mass
         visualizer.update_visual_object_position_orientation(box_id, pos, QuaternionIdentity());
 

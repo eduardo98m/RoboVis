@@ -28,11 +28,14 @@ set(RAYMGUI_SOURCES
 
 set(ROBO_VIS_SOURCES
     src/Visualizer.cpp
+    
 )
 
 set(SOURCES
     src/Visualizer.cpp
+    
 )
+
 
 set(EXAMPLE_SOURCES
     examples/SpringMassSimulation.cpp
