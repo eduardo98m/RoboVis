@@ -4,6 +4,15 @@
 #include <iostream>
 #include <algorithm> // std::clamp
 #include <cmath> // std::tanh
+#include "imgui.h"
+
+void interface_extras(void){
+    static int i = 0;
+    ImGui::Begin("Hello");
+    ImGui::Text(std::to_string(i).c_str());
+    ImGui::End();
+    i++;
+}
 
 
 int main() {
@@ -12,6 +21,7 @@ int main() {
 
     // Set up the camera
     visualizer.set_up_camera();
+    visualizer.set_imgui_interfaces(interface_extras);
 
     Vector3 pos = {0.0f, -2.0f, 0.0f};
     Vector3 vel = {0.0f, 0.0f, 0.0f};

@@ -9,6 +9,7 @@
 #include "raymath.h"
 #include "rlights.hpp"
 #include <iostream>
+#include <functional>
 
 #define GLSL_VERSION 330
 
@@ -71,6 +72,8 @@ private:
     RenderTexture2D shader_target_; // Render target for shaders.
     Light light_;                   // Lighting setup for the scene.
     bool show_bodies_coordinate_frame_ = false;
+
+    std::function<void(void)>  imgui_interfaces_calls = [](void) -> void {return;};
 
 public:
     /**
@@ -273,4 +276,6 @@ public:
     void modify_text_label(int index, std::string text);
 
     void modify_text_position(int index, Vector3 position);
+
+    void set_imgui_interfaces(std::function<void(void)> func);
 };

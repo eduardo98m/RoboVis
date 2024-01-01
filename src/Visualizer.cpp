@@ -94,7 +94,7 @@ void Visualizer::draw_shader()
 void Visualizer::draw_gui()
 {
     rlImGuiBegin();
-
+    this->imgui_interfaces_calls();
     // Draw the GUI
     ImGui::Begin("Controls");
     ImGui::Text("Visualizer");
@@ -466,4 +466,8 @@ void Visualizer::close()
     rlImGuiShutdown();
     UnloadRenderTexture(this->shader_target_);
     CloseWindow();
+}
+
+void Visualizer::set_imgui_interfaces(std::function<void(void)> func){
+    this->imgui_interfaces_calls = func;
 }
