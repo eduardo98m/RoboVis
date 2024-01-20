@@ -26,37 +26,49 @@ struct VisualObject
     int group_id = 0;       // Group ID to which the visual object belongs.
 };
 
+/**
+ * @brief Represents a 3D line with a starting position, ending position, and color.
+ */
 struct Line
 {
-    Vector3 start_pos; // Start position of the line
-    Vector3 end_pos;   // End position of the line
-    Color color;       // Color of the line
+    Vector3 start_pos; // Start position of the line.
+    Vector3 end_pos;   // End position of the line.
+    Color color;       // Color of the line.
 };
 
+/**
+ * @brief Represents a 3D point with a position and color.
+ */
 struct Point
 {
-    Vector3 position;
-    Color color;
+    Vector3 position; // Position of the point.
+    Color color;      // Color of the point.
 };
 
+/**
+ * @brief Represents a 3D arrow with an origin, vector, radius, and color.
+ */
 struct Arrow
 {
-    Vector3 origin; 
-    Vector3 vector;
-    float radius;
-    Color color; 
+    Vector3 origin; // Origin of the arrow.
+    Vector3 vector; // Direction and length of the arrow.
+    float radius;   // Radius of the arrow.
+    Color color;    // Color of the arrow.
 };
 
-
-struct TextLabel{
-    std::string text;
-    Vector3 position;
-    float fontSize = 500.0;
-    Color color = WHITE;
-    Font font = GetFontDefault();
-    bool background;
-    Color backgroundColor = BLACK;  
-    bool enabled = true;
+/**
+ * @brief Represents a 3D text label with text, position, font size, color, and background options.
+ */
+struct TextLabel
+{
+    std::string text;              // Text content of the label.
+    Vector3 position;              // Position of the label.
+    float fontSize = 500.0;        // Font size of the label.
+    Color color = WHITE;           // Color of the label.
+    Font font = GetFontDefault();  // Font used for rendering.
+    bool background;               // Flag indicating whether to display a background for the label.
+    Color backgroundColor = BLACK; // Background color.
+    bool enabled = true;           // Flag indicating whether the label is enabled.
 };
 
 /**
@@ -65,27 +77,28 @@ struct TextLabel{
 class Visualizer
 {
 private:
-    const int screen_width_;                            // Screen width for visualization.
-    const int screen_height_;                           // Screen height for visualization.
-    const char *title_;                                 // Title of the visualization window.
-    Camera camera_;      // Camera for viewing the scene.
-    Shader shader_;                                     // Shader used for rendering.
-    bool shader_loaded_ = false;                        // Flag indicating whether the shader is loaded.
-    std::vector<VisualObject> visual_objects_;          // List of visual objects in the scene.
-    std::vector<Point> points_;
-    std::queue<Line> lines_;
-    std::queue<Arrow> arrows_;
-    std::queue<TextLabel> text_labels_buffer_;
-    std::map<int, TextLabel> text_labels_;
-    bool wireframe_mode_;      // Flag indicating whether to render in wireframe mode.
-    int focused_object_index_; // Index of the focused visual object.
-    int previously_focused_object_index_ = -2;
-    bool focus_mode_ = false;
-    RenderTexture2D shader_target_; // Render target for shaders.
-    Light light_;                   // Lighting setup for the scene.
-    bool show_bodies_coordinate_frame_ = false;
+    const int screen_width_;                    // Screen width for visualization.
+    const int screen_height_;                   // Screen height for visualization.
+    const char *title_;                         // Title of the visualization window.
+    Camera camera_;                             // Camera for viewing the scene.
+    Shader shader_;                             // Shader used for rendering.
+    bool shader_loaded_ = false;                // Flag indicating whether the shader is loaded.
+    std::vector<VisualObject> visual_objects_;  // List of visual objects in the scene.
+    std::vector<Point> points_;                 // List of points in the scene.
+    std::queue<Line> lines_;                    // Queue of lines to be drawn.
+    std::queue<Arrow> arrows_;                  // Buffer of arrows to be drawn.
+    std::queue<TextLabel> text_labels_buffer_;  // Buffer for text labels to be drawn.
+    std::map<int, TextLabel> text_labels_;      // Map of text labels with their indices.
+    bool wireframe_mode_;                       // Flag indicating whether to render in wireframe mode.
+    int focused_object_index_;                  // Index of the focused visual object.
+    int previously_focused_object_index_ = -2;  // Index of the previously focused visual object.
+    bool focus_mode_ = false;                   // Flag indicating whether the focus mode is enabled.
+    RenderTexture2D shader_target_;             // Render target for shaders.
+    Light light_;                               // Lighting setup for the scene.
+    bool show_bodies_coordinate_frame_ = false; // Flag indicating whether to show coordinate frames for bodies.
 
-    std::function<void(void)>  imgui_interfaces_calls = [](void) -> void {return;};
+    std::function<void(void)> imgui_interfaces_calls = [](void) -> void
+    { return; }; // Function to define ImGui interfaces; initialized as a no-op.
 
 public:
     /**
@@ -143,7 +156,7 @@ public:
      */
     void set_up_lighting();
 
-    // Shader
+    // Shader (Not in use)
     /**
      * @brief Loads and sets the shader for rendering.
      * @param filename_fs Path to the fragment shader file.
@@ -151,8 +164,6 @@ public:
      * @param group_id Group ID associated with the shader.
      */
     void load_shader(const char *filename_fs, const char *filename_vs, int group_id);
-
-    //--------------------//
 
     /**
      * @brief Adds a visual object to the scene.
@@ -195,8 +206,6 @@ public:
      * @brief Clears all visual objects from the scene.
      */
     void clear_visual_objects();
-
-    // Functions to draw geometric primitives
 
     /**
      * @brief Adds a cube to the scene.
@@ -267,31 +276,86 @@ public:
      */
     int add_mesh(const char *filename, Vector3 position, Quaternion orientation, Color color, float scale);
 
-    // Helper drawing functions:
-    // This set of functions purposes are to let the user draw visual indicators:
-    // * Lines, Text
-
     /**
+     * @brief Draws a line between two points.
      *
+     * @param start_pos Starting position of the line.
+     * @param end_pos Ending position of the line.
+     * @param color Color of the line (default is WHITE).
      */
-
     void draw_line(Vector3 start_pos, Vector3 end_pos, Color color = WHITE);
 
+    /**
+     * @brief Draws an arrow from a specified origin with a given vector.
+     *
+     * @param origin Starting point of the arrow.
+     * @param vector Direction and length of the arrow.
+     * @param radius Radius of the arrow.
+     * @param color Color of the arrow.
+     */
     void draw_arrow(Vector3 origin, Vector3 vector, float radius, Color color);
 
-    // int add_point()
+    /**
+     * @brief Draws text at a specified position with optional parameters.
+     *
+     * @param text The text to be drawn.
+     * @param position Position of the text.
+     * @param font_size Font size of the text (default is 500.0).
+     * @param background Whether to display a background for the text (default is true).
+     * @param color Color of the text (default is WHITE).
+     * @param font Font used for rendering (default is GetFontDefault()).
+     * @param background_color Background color (default is BLACK).
+     */
+    void draw_text(std::string text, Vector3 position, float font_size = 500.0, bool background = true, Color color = WHITE, Font font = GetFontDefault(), Color background_color = BLACK);
 
-    void draw_text(std::string text, Vector3 position, float font_size = 500.0, bool background = true, Color color  = WHITE, Font font = GetFontDefault(), Color background_color = BLACK);
-
+    /**
+     * @brief Draws a text label using specified parameters.
+     *
+     * @param label The text label to be drawn.
+     */
     void draw_text_label(TextLabel label);
 
-    int add_text_label(std::string text, Vector3 position, float font_size = 500.0, bool background = true, Color color  = WHITE, Font font = GetFontDefault(), Color background_color = BLACK);
+    /**
+     * @brief Adds a text label to the scene with specified parameters.
+     *
+     * @param text The text for the label.
+     * @param position Position of the label.
+     * @param font_size Font size of the label (default is 500.0).
+     * @param background Whether to display a background for the label (default is true).
+     * @param color Color of the label (default is WHITE).
+     * @param font Font used for rendering (default is GetFontDefault()).
+     * @param background_color Background color (default is BLACK).
+     * @return The index of the added text label.
+     */
+    int add_text_label(std::string text, Vector3 position, float font_size = 500.0, bool background = true, Color color = WHITE, Font font = GetFontDefault(), Color background_color = BLACK);
 
+    /**
+     * @brief Modifies the text of an existing text label.
+     *
+     * @param index Index of the text label to be modified.
+     * @param text New text for the label.
+     */
     void modify_text_label(int index, std::string text);
 
+    /**
+     * @brief Modifies the position of an existing text label.
+     *
+     * @param index Index of the text label to be modified.
+     * @param position New position for the label.
+     */
     void modify_text_position(int index, Vector3 position);
 
+    /**
+     * @brief Sets ImGui interfaces for the application.
+     *
+     * @param func Function defining ImGui interfaces.
+     */
     void set_imgui_interfaces(std::function<void(void)> func);
 
+    /**
+     * @brief Allows the user to select a visual object with the mouse by double clicking it.
+     *
+     * @return The index of the selected visual object.
+     */
     int select_visual_object();
 };
