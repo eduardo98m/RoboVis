@@ -143,30 +143,30 @@ void Visualizer::update_camera()
     Vector3 cameraFront = Vector3Subtract(this->camera_.target, this->camera_.position);
     Vector3 cameraRight = Vector3Normalize(Vector3CrossProduct(cameraFront, this->camera_.up));
 
-    float cameraSpeed = 0.1f;
+    float cameraSpeed = 0.5f;
     float cameraRotationSpeed = 0.2f;
 
     Vector3 movement = {0.0f, 0.0f, 0.0f};
     Vector3 rotation = {0.0f, 0.0f, 0.0f};
 
     if (IsKeyDown(KEY_W))
-        movement.x += 1.0f;
+        movement.x += cameraSpeed;
     if (IsKeyDown(KEY_S))
-        movement.x -= 1.0f;
+        movement.x -= cameraSpeed;
     if (IsKeyDown(KEY_A))
-        movement.y -= 1.0f;
+        movement.y -= cameraSpeed;
     if (IsKeyDown(KEY_D))
-        movement.y += 1.0f;
+        movement.y += cameraSpeed;
 
     // Vertical movement with Shift (up) and Control (down) keys
     if (IsKeyDown(KEY_LEFT_SHIFT))
-        movement.z += 1.0f;
+        movement.z += cameraSpeed;
     if (IsKeyDown(KEY_LEFT_CONTROL))
-        movement.z -= 1.0f;
+        movement.z -= cameraSpeed;
     if (IsKeyDown(KEY_Q))
-        movement.z += 1.0f;
+        movement.z += cameraSpeed;
     if (IsKeyDown(KEY_E))
-        movement.z -= 1.0f;
+        movement.z -= cameraSpeed;
 
     // Camera rotation with the mouse
     if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON))
@@ -198,34 +198,13 @@ void Visualizer::update_camera()
     UpdateCameraPro(&(this->camera_), movement, rotation, 0.0f);
 }
 
-void draw_arrow(Vector3 start_position, Vector3 end_position, Color color, float radius)
-{
-
-    Vector3 dir_vector = Vector3Subtract(end_position, start_position);
-    Vector3 tip_start_pos = Vector3Add(start_position, Vector3Scale(dir_vector, 0.9));
-    float distance = Vector3Distance(start_position, end_position);
-
-    // DrawCylinder(start_position, radius, radius, distance * 0.9, 20, color);
-    DrawCylinderEx(start_position, tip_start_pos, radius, radius, 10, color);
-    DrawCylinderEx(tip_start_pos, end_position, radius * 2.0, 0.01 * radius, 20, color);
-    // DrawCylinder(tip_start_pos, 0.01 * radius, radius * 1.25, distance*0.1, 20, color);
-}
-
-void draw_axes(Vector3 position, Quaternion orientation)
-{
-    float lenght = 1.0;
-    float radius = lenght * 0.03;
-    orientation = QuaternionNormalize(orientation);
-    draw_arrow(position, Vector3Add(position, Vector3RotateByQuaternion({lenght, 0.0, 0.0}, orientation)), RED, radius);
-    draw_arrow(position, Vector3Add(position, Vector3RotateByQuaternion({0.0, lenght, 0.0}, orientation)), GREEN, radius);
-    draw_arrow(position, Vector3Add(position, Vector3RotateByQuaternion({0.0, 0.0, lenght}, orientation)), BLUE, radius);
-}
 void Visualizer::update()
 {
 
     // Update the camera
     this->update_camera();
     this->set_camera_focus();
+    this->select_visual_object();
 
     // Draw
     BeginTextureMode(this->shader_target_);
@@ -236,11 +215,6 @@ void Visualizer::update()
     BeginMode3D(this->camera_);
     DrawGrid(100, 1.0f);
     EndMode3D();
-
-    for (TextLabel label : this->text_labels_)
-    {
-        this->draw_text_label(label);
-    }
 
     BeginMode3D(this->camera_);
     for (auto &vis_object : this->visual_objects_)
@@ -266,7 +240,7 @@ void Visualizer::update()
 
         if (this->show_bodies_coordinate_frame_)
         {
-            draw_axes(vis_object.position, vis_object.orientation);
+            du::draw_axes(vis_object.position, vis_object.orientation);
         }
     }
 
@@ -277,8 +251,29 @@ void Visualizer::update()
         DrawLine3D(line.start_pos, line.end_pos, line.color);
         this->lines_.pop();
     }
+    // Draw Arrows
+    while (!this->arrows_.empty())
+    {
+        Arrow arrow = this->arrows_.front();
+        du::draw_arrow(arrow.origin, Vector3Add(arrow.origin, arrow.vector), arrow.color, arrow.radius);
+        this->arrows_.pop();
+    }
 
     EndMode3D();
+
+    // Draw the text on the normal labels
+    for (const auto &[_, label] : this->text_labels_)
+    {
+        this->draw_text_label(label);
+    }
+
+    // Draw the text from the buffer
+    while (!this->text_labels_buffer_.empty())
+    {
+        TextLabel label = this->text_labels_buffer_.front();
+        this->draw_text_label(label);
+        this->text_labels_buffer_.pop();
+    }
     EndTextureMode();
 
     BeginDrawing();
@@ -293,12 +288,10 @@ void Visualizer::draw_text_label(TextLabel label)
     float distance = Vector3Distance(label.position, this->camera_.position);
     Vector2 screenPosition = GetWorldToScreen(label.position, this->camera_);
 
-    // const char * text = std::string(label.text) + " " + std::string(distance);
-
     // Adjust text size based on the distance
     float text_size = (label.fontSize / distance);
 
-    Vector2 text_dim = MeasureTextEx(label.font, label.text, text_size, text_size * 0.3);
+    Vector2 text_dim = MeasureTextEx(label.font, label.text.c_str(), text_size, text_size * 0.3);
 
     Vector2 background_pos = screenPosition;
     background_pos.x = screenPosition.x - text_dim.x * 0.05;
@@ -306,18 +299,14 @@ void Visualizer::draw_text_label(TextLabel label)
     text_dim.x = text_dim.x * 1.10;
     text_dim.y = text_dim.y * 1.10;
 
-    // int backgroundHeight = text_dim.y;
-    // DrawRectangle(screenPosition.x, screenPosition.y, backgroundWidth, backgroundHeight, BLACK);
-
     DrawRectangleV(background_pos, text_dim, BLACK);
-    DrawTextEx(label.font, label.text, screenPosition, text_size, text_size * 0.3, WHITE);
+    DrawTextEx(label.font, label.text.c_str(), screenPosition, text_size, text_size * 0.3, WHITE);
 }
 
-int Visualizer::add_text_label(const char *text, Vector3 position, float font_size, bool background, Color color, Font font, Color background_color)
+void Visualizer::draw_text(std::string text, Vector3 position, float font_size, bool background, Color color, Font font, Color background_color)
 {
-
     TextLabel label = {
-        text, //+ (int)this->camera_.target.x,
+        text,
         position,
         font_size,
         color,
@@ -326,19 +315,29 @@ int Visualizer::add_text_label(const char *text, Vector3 position, float font_si
         background_color,
         true};
 
-    this->text_labels_.push_back(label);
+    this->text_labels_buffer_.push(label);
+}
+
+int Visualizer::add_text_label(std::string text, Vector3 position, float font_size, bool background, Color color, Font font, Color background_color)
+{
+    TextLabel label = {
+        text,
+        position,
+        font_size,
+        color,
+        font,
+        background,
+        background_color,
+        true};
+
+    this->text_labels_.insert({this->text_labels_.size() - 1, label});
 
     return this->text_labels_.size() - 1;
 }
 
-void Visualizer::modify_text_label(int index, const char *text)
-{
-    this->text_labels_[index].text = text;
-}
-
 void Visualizer::modify_text_label(int index, std::string text)
 {
-    this->text_labels_[index].text = text.c_str();
+    this->text_labels_[index].text = text;
 }
 
 void Visualizer::modify_text_position(int index, Vector3 position)
@@ -422,6 +421,16 @@ void Visualizer::draw_line(Vector3 start_pos, Vector3 end_pos, Color color)
     this->lines_.push(line);
 }
 
+void Visualizer::draw_arrow(Vector3 origin, Vector3 vector, float radius, Color color)
+{
+    Arrow arrow = {
+        origin,
+        vector,
+        radius,
+        color};
+    this->arrows_.push(arrow);
+}
+
 // int Visualizer::add_heightmap(Vector3 position, Quaternion orientation, Color color, std::vector<std::vector<float>> heightmap) {
 //     Mesh heightmap_mesh = GenMeshHeightmap(heightmap, 1.0f, 1.0f, 1.0f);
 //     Model heightmap_model = LoadModelFromMesh(heightmap_mesh);
@@ -468,6 +477,52 @@ void Visualizer::close()
     CloseWindow();
 }
 
-void Visualizer::set_imgui_interfaces(std::function<void(void)> func){
+void Visualizer::set_imgui_interfaces(std::function<void(void)> func)
+{
     this->imgui_interfaces_calls = func;
+}
+
+int Visualizer::select_visual_object()
+{
+    // Static variables to track the double click
+    static bool double_click = true;
+    static float double_click_time = 0.0f;
+
+    float nearest_collision_distance = FLT_MAX;
+
+    // Apply the function if there is a double click
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && double_click)
+    {
+
+        double_click = false;
+        Ray ray = GetMouseRay(GetMousePosition(), this->camera_);
+        DrawRay(ray, GREEN);
+        int i = 0;
+        for (const auto &obj : this->visual_objects_)
+        {
+            // Note that this works because we use single mesh models.
+            RayCollision collision = GetRayCollisionMesh(ray, obj.model.meshes[0], du::get_transform(obj.position, obj.orientation));
+
+            if (collision.hit && collision.distance < nearest_collision_distance)
+            {
+                // Update the nearest object information
+                nearest_collision_distance = collision.distance;
+                this->focused_object_index_ = i;
+            }
+            i++;
+        }
+    }
+    // If there is a single click start the double click timer
+    else if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !double_click)
+    {
+        double_click = true;
+        double_click_time = GetTime();
+    }
+    // Reset double-click flag after a certain time threshold (0.5s)
+    if (double_click && (GetTime() - double_click_time > 0.5)) 
+    {
+        double_click = false;
+    }
+    // Finally return the object at focuss
+    return this->focused_object_index_;
 }

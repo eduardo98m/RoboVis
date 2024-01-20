@@ -10,7 +10,8 @@
 #include "rlights.hpp"
 #include <iostream>
 #include <functional>
-
+#include <map>
+#include "DrawingUtils.hpp"
 #define GLSL_VERSION 330
 
 /**
@@ -38,8 +39,17 @@ struct Point
     Color color;
 };
 
+struct Arrow
+{
+    Vector3 origin; 
+    Vector3 vector;
+    float radius;
+    Color color; 
+};
+
+
 struct TextLabel{
-    const char *text;
+    std::string text;
     Vector3 position;
     float fontSize = 500.0;
     Color color = WHITE;
@@ -64,7 +74,9 @@ private:
     std::vector<VisualObject> visual_objects_;          // List of visual objects in the scene.
     std::vector<Point> points_;
     std::queue<Line> lines_;
-    std::vector<TextLabel> text_labels_;
+    std::queue<Arrow> arrows_;
+    std::queue<TextLabel> text_labels_buffer_;
+    std::map<int, TextLabel> text_labels_;
     bool wireframe_mode_;      // Flag indicating whether to render in wireframe mode.
     int focused_object_index_; // Index of the focused visual object.
     int previously_focused_object_index_ = -2;
@@ -265,17 +277,21 @@ public:
 
     void draw_line(Vector3 start_pos, Vector3 end_pos, Color color = WHITE);
 
+    void draw_arrow(Vector3 origin, Vector3 vector, float radius, Color color);
+
     // int add_point()
+
+    void draw_text(std::string text, Vector3 position, float font_size = 500.0, bool background = true, Color color  = WHITE, Font font = GetFontDefault(), Color background_color = BLACK);
 
     void draw_text_label(TextLabel label);
 
-    int add_text_label(const char *text, Vector3 position, float font_size = 500.0, bool background = true, Color color  = WHITE, Font font = GetFontDefault(), Color background_color = BLACK);
-
-    void modify_text_label(int index, const char *text);
+    int add_text_label(std::string text, Vector3 position, float font_size = 500.0, bool background = true, Color color  = WHITE, Font font = GetFontDefault(), Color background_color = BLACK);
 
     void modify_text_label(int index, std::string text);
 
     void modify_text_position(int index, Vector3 position);
 
     void set_imgui_interfaces(std::function<void(void)> func);
+
+    int select_visual_object();
 };

@@ -27,11 +27,13 @@ set(RAYMGUI_SOURCES
 )
 
 set(ROBO_VIS_SOURCES
+    src/DrawingUtils.cpp
     src/Visualizer.cpp
     
 )
 
 set(SOURCES
+    src/DrawingUtils.cpp
     src/Visualizer.cpp
     
 )
