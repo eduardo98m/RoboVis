@@ -259,6 +259,13 @@ void Visualizer::update()
         this->arrows_.pop();
     }
 
+    while (!this->aabb_buffer_.empty())
+    {
+        AxisAlignedBoundingBox aabb = this->aabb_buffer_.front();
+        DrawBoundingBox(aabb.bounding_box, aabb.color);
+        this->aabb_buffer_.pop();
+    }
+
     EndMode3D();
 
     // Draw the text on the normal labels
@@ -371,13 +378,34 @@ int Visualizer::add_sphere(Vector3 position, Quaternion orientation, Color color
 int Visualizer::add_cylinder(Vector3 position, Quaternion orientation, Color color, float radius, float height)
 {
     Mesh cylinder_mesh = GenMeshCylinder(radius, height, 16);
+
     Model cylinder = LoadModelFromMesh(cylinder_mesh);
+    cylinder.transform = MatrixTranslate(0, -height * 0.5, 0);
     VisualObject cylinder_vis_object = {
         position,
         orientation, cylinder, color};
 
     return this->add_visual_object(cylinder_vis_object);
 }
+
+// int Visualizer::add_capsule(Vector3 position, Quaternion orientation, Color color, float radius, float height)
+// {
+    
+
+  
+//     // Set the position and orientation of the complete capsule model
+//     //capsule_model.transform = du::get_transform(position, orientation); 
+
+//     // Create a VisualObject with the complete capsule model
+//     VisualObject capsule_vis_object = {
+//         position,
+//         orientation,
+//         capsule_model,
+//         color
+//     };
+
+//     return this->add_visual_object(capsule_vis_object);
+// }
 
 int Visualizer::add_cone(Vector3 position, Quaternion orientation, Color color, float radius, float height)
 {
@@ -429,6 +457,19 @@ void Visualizer::draw_arrow(Vector3 origin, Vector3 vector, float radius, Color 
         radius,
         color};
     this->arrows_.push(arrow);
+}
+
+void Visualizer::draw_aabb(Vector3 min, Vector3 max, Color color)
+{
+    BoundingBox bounding_box = {
+        .min = min,
+        .max = max};
+
+    AxisAlignedBoundingBox aabb = {
+        .bounding_box = bounding_box,
+        .color = color};
+
+    this->aabb_buffer_.push(aabb);
 }
 
 // int Visualizer::add_heightmap(Vector3 position, Quaternion orientation, Color color, std::vector<std::vector<float>> heightmap) {
@@ -519,7 +560,7 @@ int Visualizer::select_visual_object()
         double_click_time = GetTime();
     }
     // Reset double-click flag after a certain time threshold (0.5s)
-    if (double_click && (GetTime() - double_click_time > 0.5)) 
+    if (double_click && (GetTime() - double_click_time > 0.5))
     {
         double_click = false;
     }

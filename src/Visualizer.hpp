@@ -56,6 +56,11 @@ struct Arrow
     Color color;    // Color of the arrow.
 };
 
+struct AxisAlignedBoundingBox{
+    BoundingBox bounding_box;
+    Color color;
+};
+
 /**
  * @brief Represents a 3D text label with text, position, font size, color, and background options.
  */
@@ -88,6 +93,7 @@ private:
     std::queue<Line> lines_;                    // Queue of lines to be drawn.
     std::queue<Arrow> arrows_;                  // Buffer of arrows to be drawn.
     std::queue<TextLabel> text_labels_buffer_;  // Buffer for text labels to be drawn.
+    std::queue<AxisAlignedBoundingBox> aabb_buffer_;       // Buffer for AABB  to be drawn.
     std::map<int, TextLabel> text_labels_;      // Map of text labels with their indices.
     bool wireframe_mode_;                       // Flag indicating whether to render in wireframe mode.
     int focused_object_index_;                  // Index of the focused visual object.
@@ -241,6 +247,17 @@ public:
     int add_cylinder(Vector3 position, Quaternion orientation, Color color, float radius, float height);
 
     /**
+     * @brief Adds a capsule to the scene.
+     * @param position Position of the capsule.
+     * @param orientation Orientation of the capsule.
+     * @param color Color of the capsule.
+     * @param radius Radius of the capsule.
+     * @param height Height of the capsule.
+     * @return The index of the added capsule.
+     */
+    int add_capsule(Vector3 position, Quaternion orientation, Color color, float radius, float height);
+
+    /**
      * @brief Adds a cone to the scene.
      * @param position Position of the cone.
      * @param orientation Orientation of the cone.
@@ -314,6 +331,15 @@ public:
      * @param label The text label to be drawn.
      */
     void draw_text_label(TextLabel label);
+
+    /**
+     * @brief Draws an axis aligned bounding box.
+     *
+     * @param min min value of the axis aligned bounding box.
+     * @param max max value of the axis aligned bounding box.
+     * @param color Color of the bounding box.
+     */
+    void draw_aabb(Vector3 min, Vector3 max, Color color);
 
     /**
      * @brief Adds a text label to the scene with specified parameters.

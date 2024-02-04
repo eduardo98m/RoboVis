@@ -23,7 +23,7 @@ namespace du
         draw_arrow(position, Vector3Add(position, Vector3RotateByQuaternion({0.0, 0.0, lenght}, orientation)), BLUE, radius);
     }
 
-    Matrix get_transform(const Vector3 v, const Quaternion &q){
+    Matrix get_transform(const Vector3 &v, const Quaternion &q){
         Vector3 axis;
         float angle;
         QuaternionToAxisAngle(q, &axis, &angle);
