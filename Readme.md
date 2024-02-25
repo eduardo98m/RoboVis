@@ -59,6 +59,11 @@ make
 sudo make install
 ```
 
+To be able to automatically use raylib in your projects (in our case RoboVis) using cmake add this line to your bash.rc file :
+```bash
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/:$LD_LIBRARY_PATH
+```
+
 ### Installing RoboVis
 
 To install RoboVis, follow these steps:
