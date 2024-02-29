@@ -37,12 +37,13 @@ struct Line
 };
 
 /**
- * @brief Represents a 3D point with a position and color.
+ * @brief Represents a 3D sphere with a position, radius and color.
  */
-struct Point
+struct VisSphere
 {
-    Vector3 position; // Position of the point.
-    Color color;      // Color of the point.
+    Vector3 position; // Position of the sphere.
+    float radius;      // Color of the sphere.
+    Color color;      // Color of the sphere.
 };
 
 /**
@@ -89,7 +90,7 @@ private:
     Shader shader_;                             // Shader used for rendering.
     bool shader_loaded_ = false;                // Flag indicating whether the shader is loaded.
     std::vector<VisualObject> visual_objects_;  // List of visual objects in the scene.
-    std::vector<Point> points_;                 // List of points in the scene.
+    std::queue<VisSphere> spheres_;                 // List of points in the scene.
     std::queue<Line> lines_;                    // Queue of lines to be drawn.
     std::queue<Arrow> arrows_;                  // Buffer of arrows to be drawn.
     std::queue<TextLabel> text_labels_buffer_;  // Buffer for text labels to be drawn.
@@ -340,6 +341,16 @@ public:
      * @param color Color of the bounding box.
      */
     void draw_aabb(Vector3 min, Vector3 max, Color color);
+
+    /**
+     * @brief Draws an sphere (temporarily)
+     *
+     * @param min min value of the axis aligned bounding box.
+     * @param max max value of the axis aligned bounding box.
+     * @param color Color of the bounding box.
+     */
+    void draw_sphere(Vector3 position, float radius, Color color = RED);
+
 
     /**
      * @brief Adds a text label to the scene with specified parameters.

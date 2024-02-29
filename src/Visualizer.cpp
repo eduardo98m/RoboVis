@@ -251,6 +251,13 @@ void Visualizer::update()
         DrawLine3D(line.start_pos, line.end_pos, line.color);
         this->lines_.pop();
     }
+    // Draw The spheres
+    while (!this->spheres_.empty())
+    {
+        VisSphere sphere = this->spheres_.front();
+        DrawSphere(sphere.position, sphere.radius, sphere.color);
+        this->spheres_.pop();
+    }
     // Draw Arrows
     while (!this->arrows_.empty())
     {
@@ -447,6 +454,18 @@ void Visualizer::draw_line(Vector3 start_pos, Vector3 end_pos, Color color)
         end_pos,
         color};
     this->lines_.push(line);
+}
+
+void Visualizer::draw_sphere(Vector3 position, float radius, Color color)
+{
+    
+    VisSphere sphere = {
+        .position = position,
+        .radius = radius,
+        .color = color
+    };
+    this->spheres_.push(sphere);
+
 }
 
 void Visualizer::draw_arrow(Vector3 origin, Vector3 vector, float radius, Color color)
