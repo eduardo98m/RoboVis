@@ -390,6 +390,12 @@ public:
     void set_imgui_interfaces(std::function<void(void)> func);
 
     /**
+     * Clears the vector of functions that show the Imgui interfaces
+     * 
+    */
+   void clear_gui_interfaces(void);
+
+    /**
      * @brief Allows the user to select a visual object with the mouse by double clicking it.
      *
      * @return The index of the selected visual object.

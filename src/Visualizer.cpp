@@ -69,6 +69,11 @@ void Visualizer::clear_visual_objects()
     this->visual_objects_.clear();
 }
 
+void Visualizer::clear_gui_interfaces()
+{
+    this->imgui_interfaces_calls.clear();
+}
+
 void Visualizer::draw_shader()
 {
     if (this->shader_loaded_)
