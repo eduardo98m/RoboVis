@@ -104,9 +104,9 @@ private:
     Light light_;                               // Lighting setup for the scene.
     bool show_bodies_coordinate_frame_ = false; // Flag indicating whether to show coordinate frames for bodies.
 
-    std::function<void(void)> imgui_interfaces_calls = [](void) -> void
-    { return; }; // Function to define ImGui interfaces; initialized as a no-op.
-
+    // Function to define ImGui interfaces; initialized as a no-op.
+    std::vector<std::function<void(void)>>imgui_interfaces_calls = {[](void) -> void { return; }};
+     
 public:
     /**
      * @brief Constructor for the Visualizer class.

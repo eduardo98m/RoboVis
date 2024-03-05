@@ -94,7 +94,10 @@ void Visualizer::draw_shader()
 void Visualizer::draw_gui()
 {
     rlImGuiBegin();
-    this->imgui_interfaces_calls();
+
+    for (auto & imgui_interface_function : this->imgui_interfaces_calls){
+        imgui_interface_function();
+    }
     // Draw the GUI
     ImGui::Begin("Controls");
     ImGui::Text("Visualizer");
@@ -539,7 +542,7 @@ void Visualizer::close()
 
 void Visualizer::set_imgui_interfaces(std::function<void(void)> func)
 {
-    this->imgui_interfaces_calls = func;
+    this->imgui_interfaces_calls.push_back(func);
 }
 
 int Visualizer::select_visual_object()
