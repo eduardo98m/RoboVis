@@ -43,6 +43,8 @@ set(EXAMPLE_SOURCES
     examples/SpringMassSimulation.cpp
 )
 
+add_compile_definitions(SHADER_BASE_PATH="${CMAKE_SOURCE_DIR}/src/RoboVis/shaders")
+
 add_library(${PROJECT_NAME} ${SOURCES} ${IMGUI_SOURCES} ${RAYMGUI_SOURCES} ${RLIGHTS_SOURCES})
 
 add_executable(SpringMassSimulation ${EXAMPLE_SOURCES} ${ROBO_VIS_SOURCES} ${IMGUI_SOURCES} ${RAYMGUI_SOURCES} ${RLIGHTS_SOURCES})

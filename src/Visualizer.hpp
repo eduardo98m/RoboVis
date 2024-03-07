@@ -8,6 +8,7 @@
 #include "imgui.h"
 #include "raymath.h"
 #include "rlights.hpp"
+#include "rlgl.h"
 #include <iostream>
 #include <functional>
 #include <map>
@@ -42,7 +43,7 @@ struct Line
 struct VisSphere
 {
     Vector3 position; // Position of the sphere.
-    float radius;      // Color of the sphere.
+    float radius;     // Color of the sphere.
     Color color;      // Color of the sphere.
 };
 
@@ -57,7 +58,8 @@ struct Arrow
     Color color;    // Color of the arrow.
 };
 
-struct AxisAlignedBoundingBox{
+struct AxisAlignedBoundingBox
+{
     BoundingBox bounding_box;
     Color color;
 };
@@ -83,30 +85,34 @@ struct TextLabel
 class Visualizer
 {
 private:
-    const int screen_width_;                    // Screen width for visualization.
-    const int screen_height_;                   // Screen height for visualization.
-    const char *title_;                         // Title of the visualization window.
-    Camera camera_;                             // Camera for viewing the scene.
-    Shader shader_;                             // Shader used for rendering.
-    bool shader_loaded_ = false;                // Flag indicating whether the shader is loaded.
-    std::vector<VisualObject> visual_objects_;  // List of visual objects in the scene.
-    std::queue<VisSphere> spheres_;                 // List of points in the scene.
-    std::queue<Line> lines_;                    // Queue of lines to be drawn.
-    std::queue<Arrow> arrows_;                  // Buffer of arrows to be drawn.
-    std::queue<TextLabel> text_labels_buffer_;  // Buffer for text labels to be drawn.
-    std::queue<AxisAlignedBoundingBox> aabb_buffer_;       // Buffer for AABB  to be drawn.
-    std::map<int, TextLabel> text_labels_;      // Map of text labels with their indices.
-    bool wireframe_mode_;                       // Flag indicating whether to render in wireframe mode.
-    int focused_object_index_;                  // Index of the focused visual object.
-    int previously_focused_object_index_ = -2;  // Index of the previously focused visual object.
-    bool focus_mode_ = false;                   // Flag indicating whether the focus mode is enabled.
-    RenderTexture2D shader_target_;             // Render target for shaders.
-    Light light_;                               // Lighting setup for the scene.
-    bool show_bodies_coordinate_frame_ = false; // Flag indicating whether to show coordinate frames for bodies.
+    const int screen_width_;                // Screen width for visualization.
+    const int screen_height_;               // Screen height for visualization.
+    const char *title_;                     // Title of the visualization window.
+    Camera camera_;                         // Camera for viewing the scene.
+    Camera shadow_map_camera;               // Camera for viewing the scene.
+    std::map<std::string, Shader> shaders_; // Shaders for rendering
+    RenderTexture2D shadow_texture;         // Texture for shadows (NOT IMPLMENETED YET)
+    Shader base_shader_;
+    bool shader_loaded_ = false;                     // Flag indicating whether the shader is loaded.
+    std::vector<VisualObject> visual_objects_;       // List of visual objects in the scene.
+    std::queue<VisSphere> spheres_;                  // List of points in the scene.
+    std::queue<Line> lines_;                         // Queue of lines to be drawn.
+    std::queue<Arrow> arrows_;                       // Buffer of arrows to be drawn.
+    std::queue<TextLabel> text_labels_buffer_;       // Buffer for text labels to be drawn.
+    std::queue<AxisAlignedBoundingBox> aabb_buffer_; // Buffer for AABB  to be drawn.
+    std::map<int, TextLabel> text_labels_;           // Map of text labels with their indices.
+    bool wireframe_mode_;                            // Flag indicating whether to render in wireframe mode.
+    int focused_object_index_;                       // Index of the focused visual object.
+    int previously_focused_object_index_ = -2;       // Index of the previously focused visual object.
+    bool focus_mode_ = false;                        // Flag indicating whether the focus mode is enabled.
+    RenderTexture2D shader_target_;                  // Render target for shaders.
+    Light light_;                                    // Lighting setup for the scene.
+    bool show_bodies_coordinate_frame_ = false;      // Flag indicating whether to show coordinate frames for bodies.
 
     // Function to define ImGui interfaces; initialized as a no-op.
-    std::vector<std::function<void(void)>>imgui_interfaces_calls = {[](void) -> void { return; }};
-     
+    std::vector<std::function<void(void)>> imgui_interfaces_calls = {[](void) -> void
+                                                                     { return; }};
+
 public:
     /**
      * @brief Constructor for the Visualizer class.
@@ -162,6 +168,21 @@ public:
      * @brief Sets up the lighting for the scene.
      */
     void set_up_lighting();
+
+    /**
+     * @brief Adds ligning properties to the models on the scene
+     */
+    void assing_lighting_to_models();
+
+    /**
+     * @brief draws a visual object
+     */
+    void render_visual_object(const VisualObject &vis_object);
+
+    /**
+     * @brief Rednders the visual objects shadows (NOT IMPLEMENTED)
+     */
+    void render_visual_object_shadow(const VisualObject &vis_object);
 
     // Shader (Not in use)
     /**
@@ -351,7 +372,6 @@ public:
      */
     void draw_sphere(Vector3 position, float radius, Color color = RED);
 
-
     /**
      * @brief Adds a text label to the scene with specified parameters.
      *
@@ -391,9 +411,9 @@ public:
 
     /**
      * Clears the vector of functions that show the Imgui interfaces
-     * 
-    */
-   void clear_gui_interfaces(void);
+     *
+     */
+    void clear_gui_interfaces(void);
 
     /**
      * @brief Allows the user to select a visual object with the mouse by double clicking it.

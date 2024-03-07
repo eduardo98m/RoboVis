@@ -6,12 +6,14 @@ Visualizer::Visualizer(int screen_width, int screen_height, const char *title) :
                                                                                  wireframe_mode_(false),
                                                                                  focused_object_index_(0)
 {
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(screen_width_, screen_height_, title_);
 
     SetTargetFPS(60);
     rlImGuiSetup(true); // Setup ImGui
     this->set_up_camera();
     this->shader_target_ = LoadRenderTexture(screen_width_, screen_height_);
+    this->base_shader_ = LoadModelFromMesh(GenMeshTorus(.3f, 2.f, 20, 20)).materials[0].shader;
 }
 
 Visualizer::~Visualizer()
@@ -20,7 +22,20 @@ Visualizer::~Visualizer()
 }
 void Visualizer::set_up_camera()
 {
-    this->camera_ = (Camera3D){{0.0f, 10.0f, 10.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, 45.0f, CAMERA_PERSPECTIVE};
+
+    this->camera_ = Camera3D{
+        .position = {0.0f, 10.0f, 10.0f},
+        .target = {.0f, .0f, .0f},
+        .up = {0.0f, 1.0f, 0.0f},
+        .fovy = 45.0f,
+        .projection = CAMERA_PERSPECTIVE};
+
+    this->shadow_map_camera = Camera3D{
+        .position = {0.0f, 10.0f, 0.0f},
+        .target = {.0f, .0f, .0f},
+        .up = {0.0f, 1.0f, 0.0f},
+        .fovy = 20.0f,
+        .projection = CAMERA_PERSPECTIVE};
 }
 
 void Visualizer::set_camera_focus()
@@ -36,6 +51,11 @@ void Visualizer::set_camera_focus()
 
 int Visualizer::add_visual_object(VisualObject vis_object)
 {
+    // Add the shader to the visual object (if the shader is loaded)
+    if (this->shader_loaded_)
+    {
+        vis_object.model.materials[0].shader = this->shaders_["light"];
+    }
     this->visual_objects_.push_back(vis_object);
 
     return this->visual_objects_.size() - 1;
@@ -78,15 +98,15 @@ void Visualizer::draw_shader()
 {
     if (this->shader_loaded_)
     {
-        BeginShaderMode(this->shader_);
-        // NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
-        // TODO: Fix this with the camera target
+        // BeginShaderMode(this->shaders_["light"]);
+        //   NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
+        //   TODO: Fix this with the camera target
 
         DrawTextureRec(this->shader_target_.texture,
                        (Rectangle){0, 0, (float)this->shader_target_.texture.width, (float)-this->shader_target_.texture.height},
                        (Vector2){0, 0}, WHITE);
 
-        EndShaderMode();
+        // EndShaderMode();
     }
     else
     {
@@ -100,7 +120,8 @@ void Visualizer::draw_gui()
 {
     rlImGuiBegin();
 
-    for (auto & imgui_interface_function : this->imgui_interfaces_calls){
+    for (auto &imgui_interface_function : this->imgui_interfaces_calls)
+    {
         imgui_interface_function();
     }
     // Draw the GUI
@@ -208,9 +229,42 @@ void Visualizer::update_camera()
 
 void Visualizer::update()
 {
-
     // Update the camera
     this->update_camera();
+
+    // Update Camera Looking Vector. Vector length determines FOV.
+    this->shadow_map_camera.position = this->camera_.position;
+
+    // TODO : FIX THIS
+    if (this->shader_loaded_)
+    {
+        float cameraPos[3] = {this->camera_.position.x, this->camera_.position.y, this->camera_.position.z};
+        SetShaderValue(this->shaders_["light"], this->shaders_["light"].locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
+        //this->light_.position = this->camera_.position;
+        //this->light_.target = this->camera_.target;
+        UpdateLightValues(this->shaders_["light"], this->light_);
+
+        // for (auto &vis_object : this->visual_objects_)
+        // {
+        //     vis_object.model.materials[0].shader = this->base_shader_;
+        // }
+        // BeginTextureMode(this->shadow_texture);
+        // {
+        //     ClearBackground(GRAY);
+        //     BeginMode3D(this->shadow_map_camera);
+        //     {
+        //         for (auto &vis_object : this->visual_objects_)
+        //         {
+        //             this->render_visual_object_shadow(vis_object);
+        //         }
+        //     }
+        //     EndMode3D();
+        // }
+        // EndTextureMode();
+
+        // this->assing_lighting_to_models();
+    }
+
     this->set_camera_focus();
     this->select_visual_object();
 
@@ -219,37 +273,15 @@ void Visualizer::update()
     // Clear the background
     ClearBackground({30, 30, 30, 255});
     // Draw the axis
-
     BeginMode3D(this->camera_);
     DrawGrid(100, 1.0f);
     EndMode3D();
 
+    
     BeginMode3D(this->camera_);
     for (auto &vis_object : this->visual_objects_)
     {
-        // Get the rotation axis and angle from the quaternion
-        Vector3 axis;
-        float angle;
-        QuaternionToAxisAngle(vis_object.orientation, &axis, &angle);
-        angle = angle * 180 / 3.1415926535;
-        if (wireframe_mode_)
-        {
-            DrawModelWiresEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, vis_object.color);
-        }
-        else
-        {
-            DrawModelEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, vis_object.color);
-            // Draw wireframe with a small offset in the color (make it darker)
-            Color wireColor = {(unsigned char)(vis_object.color.r * 0.9f),
-                               (unsigned char)(vis_object.color.g * 0.9f),
-                               (unsigned char)(vis_object.color.b * 0.9f), 255};
-            DrawModelWiresEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, wireColor);
-        }
-
-        if (this->show_bodies_coordinate_frame_)
-        {
-            du::draw_axes(vis_object.position, vis_object.orientation);
-        }
+        this->render_visual_object(vis_object);
     }
 
     // Draw The lines
@@ -273,7 +305,7 @@ void Visualizer::update()
         du::draw_arrow(arrow.origin, Vector3Add(arrow.origin, arrow.vector), arrow.color, arrow.radius);
         this->arrows_.pop();
     }
-
+    // Draw AABB
     while (!this->aabb_buffer_.empty())
     {
         AxisAlignedBoundingBox aabb = this->aabb_buffer_.front();
@@ -288,7 +320,6 @@ void Visualizer::update()
     {
         this->draw_text_label(label);
     }
-
     // Draw the text from the buffer
     while (!this->text_labels_buffer_.empty())
     {
@@ -297,7 +328,6 @@ void Visualizer::update()
         this->text_labels_buffer_.pop();
     }
     EndTextureMode();
-
     BeginDrawing();
     this->draw_shader();
     // Draw the GUI
@@ -405,11 +435,9 @@ int Visualizer::add_cylinder(Vector3 position, Quaternion orientation, Color col
 
 // int Visualizer::add_capsule(Vector3 position, Quaternion orientation, Color color, float radius, float height)
 // {
-    
 
-  
 //     // Set the position and orientation of the complete capsule model
-//     //capsule_model.transform = du::get_transform(position, orientation); 
+//     //capsule_model.transform = du::get_transform(position, orientation);
 
 //     // Create a VisualObject with the complete capsule model
 //     VisualObject capsule_vis_object = {
@@ -441,6 +469,12 @@ int Visualizer::add_plane(Vector3 position, Quaternion orientation, Color color,
         position,
         orientation, plane, color};
 
+    if (this->shader_loaded_)
+    {
+        this->shadow_texture = LoadRenderTexture(400, 400);
+        plane_vis_object.model.materials[0].maps[RL_SHADER_LOC_MAP_ALBEDO].texture = this->shadow_texture.texture;
+    }
+
     return this->add_visual_object(plane_vis_object);
 }
 
@@ -466,14 +500,12 @@ void Visualizer::draw_line(Vector3 start_pos, Vector3 end_pos, Color color)
 
 void Visualizer::draw_sphere(Vector3 position, float radius, Color color)
 {
-    
+
     VisSphere sphere = {
         .position = position,
         .radius = radius,
-        .color = color
-    };
+        .color = color};
     this->spheres_.push(sphere);
-
 }
 
 void Visualizer::draw_arrow(Vector3 origin, Vector3 vector, float radius, Color color)
@@ -510,27 +542,49 @@ void Visualizer::draw_aabb(Vector3 min, Vector3 max, Color color)
 // }
 void Visualizer::set_up_lighting()
 {
-    this->light_ = CreateLight(LIGHT_DIRECTIONAL, (Vector3){0.0f, 3.0f, 0.0f}, Vector3Zero(), WHITE, this->shader_);
+    this->light_ = CreateLight(LIGHT_DIRECTIONAL, (Vector3){0.0f, 100.0f, 0.0f}, Vector3Zero(), WHITE, this->shaders_["light"]);
 
-    this->shader_.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(this->shader_, "viewPos");
+    this->shaders_["light"].locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(this->shaders_["light"], "viewPos");
 
     // Ambient light level (some basic lighting)
-    int ambientLoc = GetShaderLocation(this->shader_, "ambient");
-    Vector4 ambient = {1.0f, 1.0f, 1.0f, 1.0f}; // Use Vector4 for ambient light
-    SetShaderValue(this->shader_, ambientLoc, &ambient, SHADER_UNIFORM_VEC4);
+    int ambientLoc = GetShaderLocation(this->shaders_["light"], "ambient");
+    Vector4 ambient = {1.2f, 1.2f, 1.2f, .9f}; // Use Vector4 for ambient light
+    SetShaderValue(this->shaders_["light"], ambientLoc, &ambient, SHADER_UNIFORM_VEC4);
 
+    this->assing_lighting_to_models();
+}
+
+void Visualizer::assing_lighting_to_models()
+{
     // Assign out lighting shader to model
 
-    for (auto &vis_object : this->visual_objects_)
+    if (this->shader_loaded_)
     {
-        vis_object.model.materials[0].shader = this->shader_;
+
+        for (VisualObject &vis_object : this->visual_objects_)
+        {
+            vis_object.model.materials[0].shader = this->shaders_["light"];
+        }
     }
 }
 
 void Visualizer::load_shader(const char *filename_vs, const char *filename_fs, int group_id)
 {
-    this->shader_ = LoadShader(TextFormat(filename_vs, GLSL_VERSION), TextFormat(filename_fs, GLSL_VERSION));
+    // Shader shader = LoadShader(TextFormat(filename_vs, GLSL_VERSION), TextFormat(filename_fs, GLSL_VERSION));
+
+    // SHADER_BASE_PATH is defined in the CMAKE file
+    std::string vs_path = std::string(SHADER_BASE_PATH) + "/lighting.vs";// + filename_vs;
+    std::string fs_path = std::string(SHADER_BASE_PATH) + "/lighting.fs";// + filename_fs;
+
+    this->shaders_.insert({"light", LoadShader(TextFormat(vs_path.c_str(), GLSL_VERSION),
+                                               TextFormat(fs_path.c_str(), GLSL_VERSION))});
+
+    this->shaders_["light"].locs[RL_SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(this->shaders_["light"], "matModel");
+    this->shaders_["light"].locs[RL_SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(this->shaders_["light"], "viewPos");
+
     this->shader_loaded_ = true;
+
+    this->set_up_lighting();
 }
 
 void Visualizer::close()
@@ -593,4 +647,48 @@ int Visualizer::select_visual_object()
     }
     // Finally return the object at focuss
     return this->focused_object_index_;
+}
+
+void Visualizer::render_visual_object(const VisualObject &vis_object)
+{
+    // Get the rotation axis and angle from the quaternion
+    Vector3 axis;
+    float angle;
+    QuaternionToAxisAngle(vis_object.orientation, &axis, &angle);
+    angle = angle * 180 / 3.1415926535;
+    if (this->wireframe_mode_)
+    {
+        DrawModelWiresEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, vis_object.color);
+    }
+    else
+    {
+        DrawModelEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, vis_object.color);
+        // Draw wireframe with a small offset in the color (make it darker)
+        Color wireColor = {(unsigned char)(vis_object.color.r * 0.7f),
+                           (unsigned char)(vis_object.color.g * 0.7f),
+                           (unsigned char)(vis_object.color.b * 0.7f), 255};
+        DrawModelWiresEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, wireColor);
+    }
+
+    if (this->show_bodies_coordinate_frame_)
+    {
+        du::draw_axes(vis_object.position, vis_object.orientation);
+    }
+}
+
+void Visualizer::render_visual_object_shadow(const VisualObject &vis_object)
+{
+    // Get the rotation axis and angle from the quaternion
+    Vector3 axis;
+    float angle;
+    QuaternionToAxisAngle(vis_object.orientation, &axis, &angle);
+    angle = angle * 180 / 3.1415926535;
+    if (this->wireframe_mode_)
+    {
+        DrawModelWiresEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, DARKGRAY);
+    }
+    else
+    {
+        DrawModelEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, DARKGRAY);
+    }
 }
