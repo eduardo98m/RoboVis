@@ -425,7 +425,7 @@ int Visualizer::add_cylinder(Vector3 position, Quaternion orientation, Color col
     Mesh cylinder_mesh = GenMeshCylinder(radius, height, 16);
 
     Model cylinder = LoadModelFromMesh(cylinder_mesh);
-    cylinder.transform = MatrixTranslate(0, -height * 0.5, 0);
+    cylinder.transform = MatrixMultiply(MatrixTranslate(0, -height * 0.5, 0), MatrixRotateX(PI/2));
     VisualObject cylinder_vis_object = {
         position,
         orientation, cylinder, color};
