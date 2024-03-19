@@ -240,29 +240,8 @@ void Visualizer::update()
     {
         float cameraPos[3] = {this->camera_.position.x, this->camera_.position.y, this->camera_.position.z};
         SetShaderValue(this->shaders_["light"], this->shaders_["light"].locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
-        //this->light_.position = this->camera_.position;
-        //this->light_.target = this->camera_.target;
         UpdateLightValues(this->shaders_["light"], this->light_);
 
-        // for (auto &vis_object : this->visual_objects_)
-        // {
-        //     vis_object.model.materials[0].shader = this->base_shader_;
-        // }
-        // BeginTextureMode(this->shadow_texture);
-        // {
-        //     ClearBackground(GRAY);
-        //     BeginMode3D(this->shadow_map_camera);
-        //     {
-        //         for (auto &vis_object : this->visual_objects_)
-        //         {
-        //             this->render_visual_object_shadow(vis_object);
-        //         }
-        //     }
-        //     EndMode3D();
-        // }
-        // EndTextureMode();
-
-        // this->assing_lighting_to_models();
     }
 
     this->set_camera_focus();
@@ -280,8 +259,11 @@ void Visualizer::update()
     
     BeginMode3D(this->camera_);
     for (auto &vis_object : this->visual_objects_)
-    {
-        this->render_visual_object(vis_object);
+    {   
+        bool disabled = disabled_groups[vis_object.group_id];
+        if (!disabled){
+            this->render_visual_object(vis_object);
+        }
     }
 
     // Draw The lines
@@ -398,37 +380,47 @@ void Visualizer::modify_text_position(int index, Vector3 position)
 }
 
 // Functions to draw geometric primitives
-int Visualizer::add_box(Vector3 position, Quaternion orientation, Color color, float width, float height, float length)
+int Visualizer::add_box(Vector3 position, Quaternion orientation, Color color, float width, float height, float length, int group_id)
 {
     Mesh cube_mesh = GenMeshCube(width, height, length);
     Model cube = LoadModelFromMesh(cube_mesh);
     VisualObject cube_vis_object = {
-        position,
-        orientation, cube, color};
+        .position = position,
+        .orientation = orientation,
+        .model = cube, 
+        .color = color,
+        .group_id = group_id
+        };
 
     return this->add_visual_object(cube_vis_object);
 }
 
-int Visualizer::add_sphere(Vector3 position, Quaternion orientation, Color color, float radius)
+int Visualizer::add_sphere(Vector3 position, Quaternion orientation, Color color, float radius, int group_id)
 {
     Mesh sphere_mesh = GenMeshSphere(radius, 16, 16);
     Model sphere = LoadModelFromMesh(sphere_mesh);
     VisualObject sphere_vis_object = {
-        position,
-        orientation, sphere, color};
+        .position = position,
+        .orientation = orientation,
+        .model = sphere, 
+        .color = color,
+        .group_id = group_id};
 
     return this->add_visual_object(sphere_vis_object);
 }
 
-int Visualizer::add_cylinder(Vector3 position, Quaternion orientation, Color color, float radius, float height)
+int Visualizer::add_cylinder(Vector3 position, Quaternion orientation, Color color, float radius, float height, int group_id)
 {
     Mesh cylinder_mesh = GenMeshCylinder(radius, height, 16);
 
     Model cylinder = LoadModelFromMesh(cylinder_mesh);
     cylinder.transform = MatrixMultiply(MatrixTranslate(0, -height * 0.5, 0), MatrixRotateX(PI/2));
     VisualObject cylinder_vis_object = {
-        position,
-        orientation, cylinder, color};
+        .position = position,
+        .orientation = orientation,
+        .model = cylinder, 
+        .color = color,
+        .group_id = group_id};
 
     return this->add_visual_object(cylinder_vis_object);
 }
@@ -450,24 +442,30 @@ int Visualizer::add_cylinder(Vector3 position, Quaternion orientation, Color col
 //     return this->add_visual_object(capsule_vis_object);
 // }
 
-int Visualizer::add_cone(Vector3 position, Quaternion orientation, Color color, float radius, float height)
+int Visualizer::add_cone(Vector3 position, Quaternion orientation, Color color, float radius, float height, int group_id)
 {
     Mesh cone_mesh = GenMeshCone(radius, height, 16);
     Model cone = LoadModelFromMesh(cone_mesh);
     VisualObject cone_vis_object = {
-        position,
-        orientation, cone, color};
+        .position = position,
+        .orientation = orientation,
+        .model = cone, 
+        .color = color,
+        .group_id = group_id};
 
     return this->add_visual_object(cone_vis_object);
 }
 
-int Visualizer::add_plane(Vector3 position, Quaternion orientation, Color color, float width, float length)
+int Visualizer::add_plane(Vector3 position, Quaternion orientation, Color color, float width, float length, int group_id)
 {
     Mesh plane_mesh = GenMeshPlane(width, length, 16, 16);
     Model plane = LoadModelFromMesh(plane_mesh);
     VisualObject plane_vis_object = {
-        position,
-        orientation, plane, color};
+        .position = position,
+        .orientation = orientation,
+        .model = plane, 
+        .color = color,
+        .group_id = group_id};
 
     if (this->shader_loaded_)
     {
@@ -478,13 +476,16 @@ int Visualizer::add_plane(Vector3 position, Quaternion orientation, Color color,
     return this->add_visual_object(plane_vis_object);
 }
 
-int Visualizer::add_mesh(const char *filename, Vector3 position, Quaternion orientation, Color color, float scale)
+int Visualizer::add_mesh(const char *filename, Vector3 position, Quaternion orientation, Color color, float scale, int group_id)
 {
     Model model = LoadModel(filename);
     model.transform = MatrixScale(scale, scale, scale);
     VisualObject vis_object = {
-        position,
-        orientation, model, color};
+        .position = position,
+        .orientation = orientation,
+        .model = model, 
+        .color = color,
+        .group_id = group_id};
 
     return this->add_visual_object(vis_object);
 }
@@ -599,6 +600,14 @@ void Visualizer::close()
     CloseWindow();
 }
 
+void Visualizer::unload_models(void){
+    // Unload all the models
+    for (auto &vis_object : this->visual_objects_)
+    {
+        UnloadModel(vis_object.model);
+    }
+}
+
 void Visualizer::set_imgui_interfaces(std::function<void(void)> func)
 {
     this->imgui_interfaces_calls.push_back(func);
@@ -691,4 +700,17 @@ void Visualizer::render_visual_object_shadow(const VisualObject &vis_object)
     {
         DrawModelEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, DARKGRAY);
     }
+}
+
+void Visualizer::disable_visual_object_group_rendering(int group_id){
+    if (group_id < 255){
+        this->disabled_groups[group_id] = true;
+    } 
+}
+
+
+void Visualizer::enable_visual_object_group_rendering(int group_id){
+    if (group_id < 255){
+        this->disabled_groups[group_id] = false;
+    } 
 }

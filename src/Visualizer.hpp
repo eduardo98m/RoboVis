@@ -12,6 +12,7 @@
 #include <iostream>
 #include <functional>
 #include <map>
+#include <set>
 #include "DrawingUtils.hpp"
 #define GLSL_VERSION 330
 
@@ -95,6 +96,7 @@ private:
     Shader base_shader_;
     bool shader_loaded_ = false;                     // Flag indicating whether the shader is loaded.
     std::vector<VisualObject> visual_objects_;       // List of visual objects in the scene.
+    std::vector<bool> disabled_groups = std::vector<bool>(10);                // List of group ids of objects that will not be rendered this frame.
     std::queue<VisSphere> spheres_;                  // List of points in the scene.
     std::queue<Line> lines_;                         // Queue of lines to be drawn.
     std::queue<Arrow> arrows_;                       // Buffer of arrows to be drawn.
@@ -126,6 +128,12 @@ public:
      * @brief Destructor for the Visualizer class.
      */
     ~Visualizer();
+
+    /**
+     * @brief Unloads the models
+    */
+    void unload_models(void);
+
 
     /**
      * @brief Updates the visualizer, including camera and shader updates.
@@ -243,9 +251,10 @@ public:
      * @param width Width of the cube.
      * @param height Height of the cube.
      * @param length Length of the cube.
+     * @param group_id Id of the visual shape group of the object
      * @return The index of the added cube.
      */
-    int add_box(Vector3 position, Quaternion orientation, Color color, float width, float height, float length);
+    int add_box(Vector3 position, Quaternion orientation, Color color, float width, float height, float length, int group_id = 0);
 
     /**
      * @brief Adds a sphere to the scene.
@@ -253,9 +262,10 @@ public:
      * @param orientation Orientation of the sphere.
      * @param color Color of the sphere.
      * @param radius Radius of the sphere.
+     * @param group_id Id of the visual shape group of the object
      * @return The index of the added sphere.
      */
-    int add_sphere(Vector3 position, Quaternion orientation, Color color, float radius);
+    int add_sphere(Vector3 position, Quaternion orientation, Color color, float radius, int group_id = 0);
 
     /**
      * @brief Adds a cylinder to the scene.
@@ -264,9 +274,10 @@ public:
      * @param color Color of the cylinder.
      * @param radius Radius of the cylinder.
      * @param height Height of the cylinder.
+     * @param group_id Id of the visual shape group of the object
      * @return The index of the added cylinder.
      */
-    int add_cylinder(Vector3 position, Quaternion orientation, Color color, float radius, float height);
+    int add_cylinder(Vector3 position, Quaternion orientation, Color color, float radius, float height, int group_id = 0);
 
     /**
      * @brief Adds a capsule to the scene.
@@ -275,9 +286,10 @@ public:
      * @param color Color of the capsule.
      * @param radius Radius of the capsule.
      * @param height Height of the capsule.
+     * @param group_id Id of the visual shape group of the object
      * @return The index of the added capsule.
      */
-    int add_capsule(Vector3 position, Quaternion orientation, Color color, float radius, float height);
+    int add_capsule(Vector3 position, Quaternion orientation, Color color, float radius, float height, int group_id = 0);
 
     /**
      * @brief Adds a cone to the scene.
@@ -286,9 +298,10 @@ public:
      * @param color Color of the cone.
      * @param radius Radius of the cone.
      * @param height Height of the cone.
+     * @param group_id Id of the visual shape group of the object
      * @return The index of the added cone.
      */
-    int add_cone(Vector3 position, Quaternion orientation, Color color, float radius, float height);
+    int add_cone(Vector3 position, Quaternion orientation, Color color, float radius, float height, int group_id = 0);
 
     /**
      * @brief Adds a plane to the scene.
@@ -297,9 +310,10 @@ public:
      * @param color Color of the plane.
      * @param width Width of the plane.
      * @param length Length of the plane.
+     * @param group_id Id of the visual shape group of the object
      * @return The index of the added plane.
      */
-    int add_plane(Vector3 position, Quaternion orientation, Color color, float width, float length);
+    int add_plane(Vector3 position, Quaternion orientation, Color color, float width, float length, int group_id = 0);
 
     // Uncomment the following line when the heightmap function is implemented.
     // int add_heightmap(Vector3 position, Quaternion orientation, Color color, std::vector<std::vector<float>> heightmap);
@@ -311,9 +325,10 @@ public:
      * @param orientation Orientation of the mesh.
      * @param color Color of the mesh.
      * @param scale Scale of the mesh.
+     * @param group_id Id of the visual shape group of the object
      * @return The index of the added mesh.
      */
-    int add_mesh(const char *filename, Vector3 position, Quaternion orientation, Color color, float scale);
+    int add_mesh(const char *filename, Vector3 position, Quaternion orientation, Color color, float scale, int group_id = 0);
 
     /**
      * @brief Draws a line between two points.
@@ -421,4 +436,20 @@ public:
      * @return The index of the selected visual object.
      */
     int select_visual_object();
+
+
+    /**
+     * @brief Disables a gr.
+     *
+     * @return The index of the selected visual object.
+     */
+    void enable_visual_object_group_rendering(int group_id);
+
+     /**
+     * @brief Disables a gr.
+     *
+     * @return The index of the selected visual object.
+     */
+    void disable_visual_object_group_rendering(int group_id);
+
 };
