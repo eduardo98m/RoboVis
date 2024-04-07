@@ -14,6 +14,8 @@
 #include <map>
 #include <set>
 #include "DrawingUtils.hpp"
+// #include <sstream>
+// #include <iomanip>
 #define GLSL_VERSION 330
 
 /**
@@ -94,22 +96,22 @@ private:
     std::map<std::string, Shader> shaders_; // Shaders for rendering
     RenderTexture2D shadow_texture;         // Texture for shadows (NOT IMPLMENETED YET)
     Shader base_shader_;
-    bool shader_loaded_ = false;                     // Flag indicating whether the shader is loaded.
-    std::vector<VisualObject> visual_objects_;       // List of visual objects in the scene.
-    std::vector<bool> disabled_groups = std::vector<bool>(10);                // List of group ids of objects that will not be rendered this frame.
-    std::queue<VisSphere> spheres_;                  // List of points in the scene.
-    std::queue<Line> lines_;                         // Queue of lines to be drawn.
-    std::queue<Arrow> arrows_;                       // Buffer of arrows to be drawn.
-    std::queue<TextLabel> text_labels_buffer_;       // Buffer for text labels to be drawn.
-    std::queue<AxisAlignedBoundingBox> aabb_buffer_; // Buffer for AABB  to be drawn.
-    std::map<int, TextLabel> text_labels_;           // Map of text labels with their indices.
-    bool wireframe_mode_;                            // Flag indicating whether to render in wireframe mode.
-    int focused_object_index_;                       // Index of the focused visual object.
-    int previously_focused_object_index_ = -2;       // Index of the previously focused visual object.
-    bool focus_mode_ = false;                        // Flag indicating whether the focus mode is enabled.
-    RenderTexture2D shader_target_;                  // Render target for shaders.
-    Light light_;                                    // Lighting setup for the scene.
-    bool show_bodies_coordinate_frame_ = false;      // Flag indicating whether to show coordinate frames for bodies.
+    bool shader_loaded_ = false;                               // Flag indicating whether the shader is loaded.
+    std::vector<VisualObject> visual_objects_;                 // List of visual objects in the scene.
+    std::vector<bool> disabled_groups = std::vector<bool>(10); // List of group ids of objects that will not be rendered this frame.
+    std::queue<VisSphere> spheres_;                            // List of points in the scene.
+    std::queue<Line> lines_;                                   // Queue of lines to be drawn.
+    std::queue<Arrow> arrows_;                                 // Buffer of arrows to be drawn.
+    std::queue<TextLabel> text_labels_buffer_;                 // Buffer for text labels to be drawn.
+    std::queue<AxisAlignedBoundingBox> aabb_buffer_;           // Buffer for AABB  to be drawn.
+    std::map<int, TextLabel> text_labels_;                     // Map of text labels with their indices.
+    bool wireframe_mode_;                                      // Flag indicating whether to render in wireframe mode.
+    int focused_object_index_;                                 // Index of the focused visual object.
+    int previously_focused_object_index_ = -2;                 // Index of the previously focused visual object.
+    bool focus_mode_ = false;                                  // Flag indicating whether the focus mode is enabled.
+    RenderTexture2D shader_target_;                            // Render target for shaders.
+    Light light_;                                              // Lighting setup for the scene.
+    bool show_bodies_coordinate_frame_ = false;                // Flag indicating whether to show coordinate frames for bodies.
 
     // Function to define ImGui interfaces; initialized as a no-op.
     std::vector<std::function<void(void)>> imgui_interfaces_calls = {[](void) -> void
@@ -131,9 +133,8 @@ public:
 
     /**
      * @brief Unloads the models
-    */
+     */
     void unload_models(void);
-
 
     /**
      * @brief Updates the visualizer, including camera and shader updates.
@@ -331,6 +332,21 @@ public:
     int add_mesh(const char *filename, Vector3 position, Quaternion orientation, Color color, float scale, int group_id = 0);
 
     /**
+     * @brief Adds a mesh to the scene.
+     * @return The index of the added heightmap.
+     */
+    int add_heightmap(Vector3 position,
+                      Quaternion orientation,
+                      Color color,
+                      size_t width,
+                      size_t height,
+                      const std::vector<float>& data,
+                      float x_scale,
+                      float y_scale,
+                      float z_scale,
+                      int group_id = 0);
+
+    /**
      * @brief Draws a line between two points.
      *
      * @param start_pos Starting position of the line.
@@ -437,7 +453,6 @@ public:
      */
     int select_visual_object();
 
-
     /**
      * @brief Disables a gr.
      *
@@ -445,11 +460,10 @@ public:
      */
     void enable_visual_object_group_rendering(int group_id);
 
-     /**
+    /**
      * @brief Disables a gr.
      *
      * @return The index of the selected visual object.
      */
     void disable_visual_object_group_rendering(int group_id);
-
 };

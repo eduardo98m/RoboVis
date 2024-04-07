@@ -241,7 +241,6 @@ void Visualizer::update()
         float cameraPos[3] = {this->camera_.position.x, this->camera_.position.y, this->camera_.position.z};
         SetShaderValue(this->shaders_["light"], this->shaders_["light"].locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
         UpdateLightValues(this->shaders_["light"], this->light_);
-
     }
 
     this->set_camera_focus();
@@ -256,12 +255,12 @@ void Visualizer::update()
     DrawGrid(100, 1.0f);
     EndMode3D();
 
-    
     BeginMode3D(this->camera_);
     for (auto &vis_object : this->visual_objects_)
-    {   
+    {
         bool disabled = disabled_groups[vis_object.group_id];
-        if (!disabled){
+        if (!disabled)
+        {
             this->render_visual_object(vis_object);
         }
     }
@@ -387,10 +386,9 @@ int Visualizer::add_box(Vector3 position, Quaternion orientation, Color color, f
     VisualObject cube_vis_object = {
         .position = position,
         .orientation = orientation,
-        .model = cube, 
+        .model = cube,
         .color = color,
-        .group_id = group_id
-        };
+        .group_id = group_id};
 
     return this->add_visual_object(cube_vis_object);
 }
@@ -402,7 +400,7 @@ int Visualizer::add_sphere(Vector3 position, Quaternion orientation, Color color
     VisualObject sphere_vis_object = {
         .position = position,
         .orientation = orientation,
-        .model = sphere, 
+        .model = sphere,
         .color = color,
         .group_id = group_id};
 
@@ -414,11 +412,11 @@ int Visualizer::add_cylinder(Vector3 position, Quaternion orientation, Color col
     Mesh cylinder_mesh = GenMeshCylinder(radius, height, 16);
 
     Model cylinder = LoadModelFromMesh(cylinder_mesh);
-    cylinder.transform = MatrixMultiply(MatrixTranslate(0, -height * 0.5, 0), MatrixRotateX(PI/2));
+    cylinder.transform = MatrixMultiply(MatrixTranslate(0, -height * 0.5, 0), MatrixRotateX(PI / 2));
     VisualObject cylinder_vis_object = {
         .position = position,
         .orientation = orientation,
-        .model = cylinder, 
+        .model = cylinder,
         .color = color,
         .group_id = group_id};
 
@@ -449,7 +447,7 @@ int Visualizer::add_cone(Vector3 position, Quaternion orientation, Color color, 
     VisualObject cone_vis_object = {
         .position = position,
         .orientation = orientation,
-        .model = cone, 
+        .model = cone,
         .color = color,
         .group_id = group_id};
 
@@ -463,7 +461,7 @@ int Visualizer::add_plane(Vector3 position, Quaternion orientation, Color color,
     VisualObject plane_vis_object = {
         .position = position,
         .orientation = orientation,
-        .model = plane, 
+        .model = plane,
         .color = color,
         .group_id = group_id};
 
@@ -483,12 +481,52 @@ int Visualizer::add_mesh(const char *filename, Vector3 position, Quaternion orie
     VisualObject vis_object = {
         .position = position,
         .orientation = orientation,
-        .model = model, 
+        .model = model,
         .color = color,
         .group_id = group_id};
 
     return this->add_visual_object(vis_object);
 }
+
+int Visualizer::add_heightmap(Vector3 position,
+                              Quaternion orientation,
+                              Color color,
+                              size_t width,
+                              size_t height,
+                              const std::vector<float> &data,
+                              float x_scale,
+                              float y_scale,
+                              float z_scale,
+                              int group_id)
+{
+
+    Image formated_data{
+        .data = reinterpret_cast<void *>(const_cast<float *>(data.data())),
+        .width = width,
+        .height = height,
+        .mipmaps = 1,
+        .format = PixelFormat::PIXELFORMAT_UNCOMPRESSED_GRAYSCALE};
+
+    Vector3 size_vector = {x_scale, y_scale, z_scale};
+
+    Mesh mesh = GenMeshHeightmap(formated_data, size_vector);
+
+    int x_shift = width / 2;
+    int y_shift = height / 2;
+
+    Model model = LoadModelFromMesh(mesh);
+
+    model.transform = MatrixMultiply(MatrixTranslate(-x_shift, 0, -y_shift), MatrixRotateX(PI / 2));
+
+    VisualObject vis_object = {
+        .position = position,
+        .orientation = orientation,
+        .model = model,
+        .color = color,
+        .group_id = group_id};
+
+    return this->add_visual_object(vis_object);
+};
 
 void Visualizer::draw_line(Vector3 start_pos, Vector3 end_pos, Color color)
 {
@@ -574,8 +612,8 @@ void Visualizer::load_shader(const char *filename_vs, const char *filename_fs, i
     // Shader shader = LoadShader(TextFormat(filename_vs, GLSL_VERSION), TextFormat(filename_fs, GLSL_VERSION));
 
     // SHADER_BASE_PATH is defined in the CMAKE file
-    std::string vs_path = std::string(SHADER_BASE_PATH) + "/lighting.vs";// + filename_vs;
-    std::string fs_path = std::string(SHADER_BASE_PATH) + "/lighting.fs";// + filename_fs;
+    std::string vs_path = std::string(SHADER_BASE_PATH) + "/lighting.vs"; // + filename_vs;
+    std::string fs_path = std::string(SHADER_BASE_PATH) + "/lighting.fs"; // + filename_fs;
 
     this->shaders_.insert({"light", LoadShader(TextFormat(vs_path.c_str(), GLSL_VERSION),
                                                TextFormat(fs_path.c_str(), GLSL_VERSION))});
@@ -600,12 +638,15 @@ void Visualizer::close()
     CloseWindow();
 }
 
-void Visualizer::unload_models(void){
+void Visualizer::unload_models(void)
+{
     // Unload all the models
     for (auto &vis_object : this->visual_objects_)
     {
         UnloadModel(vis_object.model);
     }
+
+    this->visual_objects_ = {};
 }
 
 void Visualizer::set_imgui_interfaces(std::function<void(void)> func)
@@ -702,15 +743,18 @@ void Visualizer::render_visual_object_shadow(const VisualObject &vis_object)
     }
 }
 
-void Visualizer::disable_visual_object_group_rendering(int group_id){
-    if (group_id < 255){
+void Visualizer::disable_visual_object_group_rendering(int group_id)
+{
+    if (group_id < 255)
+    {
         this->disabled_groups[group_id] = true;
-    } 
+    }
 }
 
-
-void Visualizer::enable_visual_object_group_rendering(int group_id){
-    if (group_id < 255){
+void Visualizer::enable_visual_object_group_rendering(int group_id)
+{
+    if (group_id < 255)
+    {
         this->disabled_groups[group_id] = false;
-    } 
+    }
 }
