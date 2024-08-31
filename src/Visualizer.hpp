@@ -335,6 +335,20 @@ public:
 
     /**
      * @brief Adds a mesh to the scene.
+     * @param filename Path to the mesh file.
+     * @param position Position of the mesh.
+     * @param orientation Orientation of the mesh.
+     * @param color Color of the mesh.
+     * @param scale_x Scale of the mesh in the x direction.
+     * @param scale_y Scale of the mesh in the y direction.
+     * @param scale_z Scale of the mesh in the z direction.
+     * @param group_id Id of the visual shape group of the object
+     * @return The index of the added mesh.
+     */
+    int add_mesh(const char *filename, Vector3 position, Quaternion orientation, Color color, float scale_x, float scale_y, float scale_z, int group_id = 0);
+
+    /**
+     * @brief Adds a mesh to the scene.
      * @return The index of the added heightmap.
      */
     int add_heightmap(Vector3 position,

@@ -244,7 +244,7 @@ void Visualizer::update()
     }
 
     this->set_camera_focus();
-    this->select_visual_object();
+    //this->select_visual_object(); // TODO: FIX A BUG WHEN THERE ARE NO objects on the scene
 
     // Draw
     BeginTextureMode(this->shader_target_);
@@ -478,6 +478,21 @@ int Visualizer::add_mesh(const char *filename, Vector3 position, Quaternion orie
 {
     Model model = LoadModel(filename);
     model.transform = MatrixScale(scale, scale, scale);
+    VisualObject vis_object = {
+        .position = position,
+        .orientation = orientation,
+        .model = model,
+        .color = color,
+        .group_id = group_id};
+
+    return this->add_visual_object(vis_object);
+}
+
+
+int Visualizer::add_mesh(const char *filename, Vector3 position, Quaternion orientation, Color color, float scale_x, float scale_y, float scale_z, int group_id)
+{
+    Model model = LoadModel(filename);
+    model.transform = MatrixScale(scale_x, scale_y, scale_z);
     VisualObject vis_object = {
         .position = position,
         .orientation = orientation,
