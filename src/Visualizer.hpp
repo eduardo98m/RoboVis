@@ -116,6 +116,8 @@ private:
     // Function to define ImGui interfaces; initialized as a no-op.
     std::vector<std::function<void(void)>> imgui_interfaces_calls = {[](void) -> void
                                                                      { return; }};
+    
+    float camera_speed_ = 0.3;
 
 public:
     /**

@@ -134,6 +134,7 @@ void Visualizer::draw_gui()
     ImGui::Text("Target: (%f, %f, %f)", this->camera_.target.x, this->camera_.target.y, this->camera_.target.z);
     ImGui::Text("Up: (%f, %f, %f)", this->camera_.up.x, this->camera_.up.y, this->camera_.up.z);
     ImGui::SliderFloat("FOV", &this->camera_.fovy, 6, 120);
+    ImGui::SliderFloat("Speed", &this->camera_speed_, 0, 1.0);
     ImGui::Separator();
     ImGui::Text("Visual Objects");
     ImGui::Separator();
@@ -172,30 +173,29 @@ void Visualizer::update_camera()
     Vector3 cameraFront = Vector3Subtract(this->camera_.target, this->camera_.position);
     Vector3 cameraRight = Vector3Normalize(Vector3CrossProduct(cameraFront, this->camera_.up));
 
-    float cameraSpeed = 0.5f;
     float cameraRotationSpeed = 0.2f;
 
     Vector3 movement = {0.0f, 0.0f, 0.0f};
     Vector3 rotation = {0.0f, 0.0f, 0.0f};
 
     if (IsKeyDown(KEY_W))
-        movement.x += cameraSpeed;
+        movement.x += this->camera_speed_;
     if (IsKeyDown(KEY_S))
-        movement.x -= cameraSpeed;
+        movement.x -= this->camera_speed_;
     if (IsKeyDown(KEY_A))
-        movement.y -= cameraSpeed;
+        movement.y -= this->camera_speed_;
     if (IsKeyDown(KEY_D))
-        movement.y += cameraSpeed;
+        movement.y += this->camera_speed_;
 
     // Vertical movement with Shift (up) and Control (down) keys
     if (IsKeyDown(KEY_LEFT_SHIFT))
-        movement.z += cameraSpeed;
+        movement.z += this->camera_speed_;
     if (IsKeyDown(KEY_LEFT_CONTROL))
-        movement.z -= cameraSpeed;
+        movement.z -= this->camera_speed_;
     if (IsKeyDown(KEY_Q))
-        movement.z += cameraSpeed;
+        movement.z += this->camera_speed_;
     if (IsKeyDown(KEY_E))
-        movement.z -= cameraSpeed;
+        movement.z -= this->camera_speed_;
 
     // Camera rotation with the mouse
     if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON))
