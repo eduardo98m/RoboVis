@@ -13,7 +13,6 @@ Visualizer::Visualizer(int screen_width, int screen_height, const char *title) :
     rlImGuiSetup(true); // Setup ImGui
     this->set_up_camera();
     this->shader_target_ = LoadRenderTexture(screen_width_, screen_height_);
-    this->base_shader_ = LoadModelFromMesh(GenMeshTorus(.3f, 2.f, 20, 20)).materials[0].shader;
 }
 
 Visualizer::~Visualizer()
@@ -43,18 +42,20 @@ void Visualizer::set_camera_focus()
     this->focus_mode_ = (this->previously_focused_object_index_ != this->focused_object_index_ || this->focus_mode_);
     if (this->focus_mode_)
     {
-        this->camera_.target = this->visual_objects_[this->focused_object_index_].position;
+        this->camera_.target = this->visual_objects_[this->focused_object_index_]->position;
         this->previously_focused_object_index_ = this->focused_object_index_;
         this->focus_mode_ = true;
     }
 }
 
-int Visualizer::add_visual_object(VisualObject vis_object)
+int Visualizer::add_visual_object(std::shared_ptr<VisualObject> vis_object)
 {
     // Add the shader to the visual object (if the shader is loaded)
+    
+    
     if (this->shader_loaded_)
     {
-        vis_object.model.materials[0].shader = this->shaders_["light"];
+        vis_object->model.materials[0].shader = this->shaders_["light"];
     }
     this->visual_objects_.push_back(vis_object);
 
@@ -63,20 +64,20 @@ int Visualizer::add_visual_object(VisualObject vis_object)
 
 void Visualizer::update_visual_object_position_orientation(int index, Vector3 position, Quaternion orientation)
 {
-    this->visual_objects_[index].position = position;
-    this->visual_objects_[index].orientation = orientation;
+    this->visual_objects_[index]->position = position;
+    this->visual_objects_[index]->orientation = orientation;
 }
 
 void Visualizer::update_visual_object_position_orientation_scale(int index, Vector3 position, Quaternion orientation, Vector3 scale)
 {
-    this->visual_objects_[index].position = position;
-    this->visual_objects_[index].orientation = orientation;
-    this->visual_objects_[index].model.transform = MatrixScale(scale.x, scale.y, scale.z);
+    this->visual_objects_[index]->position = position;
+    this->visual_objects_[index]->orientation = orientation;
+    this->visual_objects_[index]->model.transform = MatrixScale(scale.x, scale.y, scale.z);
 }
 
 void Visualizer::update_visual_object_scale(int index, Vector3 scale)
 {
-    this->visual_objects_[index].model.transform = MatrixScale(scale.x, scale.y, scale.z);
+    this->visual_objects_[index]->model.transform = MatrixScale(scale.x, scale.y, scale.z);
 }
 
 void Visualizer::remove_visual_object(int index)
@@ -96,24 +97,9 @@ void Visualizer::clear_gui_interfaces()
 
 void Visualizer::draw_shader()
 {
-    if (this->shader_loaded_)
-    {
-        // BeginShaderMode(this->shaders_["light"]);
-        //   NOTE: Render texture must be y-flipped due to default OpenGL coordinates (left-bottom)
-        //   TODO: Fix this with the camera target
-
-        DrawTextureRec(this->shader_target_.texture,
+    DrawTextureRec(this->shader_target_.texture,
                        (Rectangle){0, 0, (float)this->shader_target_.texture.width, (float)-this->shader_target_.texture.height},
                        (Vector2){0, 0}, WHITE);
-
-        // EndShaderMode();
-    }
-    else
-    {
-        DrawTextureRec(this->shader_target_.texture,
-                       (Rectangle){0, 0, (float)this->shader_target_.texture.width, (float)-this->shader_target_.texture.height},
-                       (Vector2){0, 0}, WHITE);
-    }
 }
 
 void Visualizer::draw_gui()
@@ -135,6 +121,7 @@ void Visualizer::draw_gui()
     ImGui::Text("Up: (%f, %f, %f)", this->camera_.up.x, this->camera_.up.y, this->camera_.up.z);
     ImGui::SliderFloat("FOV", &this->camera_.fovy, 6, 120);
     ImGui::SliderFloat("Speed", &this->camera_speed_, 0, 1.0);
+    ImGui::SliderFloat("Axes Sizes", &this->axes_size, 0.0, 10.0);
     ImGui::Separator();
     ImGui::Text("Visual Objects");
     ImGui::Separator();
@@ -142,8 +129,8 @@ void Visualizer::draw_gui()
     ImGui::Checkbox("Wireframe mode", &this->wireframe_mode_);
     ImGui::Checkbox("Show Frames", &this->show_bodies_coordinate_frame_);
     ImGui::Separator();
-    // ImGui::Text("Focused object");
-    // ImGui::InputInt("Focused object index", &this->focused_object_index_);
+    ImGui::Text("Focused object");
+    //ImGui::InputInt("Focused object index", &this->focused_object_index_);
     // Create a drop down menu for the focused object
     if (ImGui::BeginCombo("Focused object", TextFormat("Object %d", this->focused_object_index_)))
     {
@@ -244,7 +231,7 @@ void Visualizer::update()
     }
 
     this->set_camera_focus();
-    //this->select_visual_object(); // TODO: FIX A BUG WHEN THERE ARE NO objects on the scene
+    this->select_visual_object();
 
     // Draw
     BeginTextureMode(this->shader_target_);
@@ -258,7 +245,7 @@ void Visualizer::update()
     BeginMode3D(this->camera_);
     for (auto &vis_object : this->visual_objects_)
     {
-        bool disabled = disabled_groups[vis_object.group_id];
+        bool disabled = disabled_groups[vis_object->group_id];
         if (!disabled)
         {
             this->render_visual_object(vis_object);
@@ -310,6 +297,7 @@ void Visualizer::update()
     }
     EndTextureMode();
     BeginDrawing();
+    // Draw the texture
     this->draw_shader();
     // Draw the GUI
     this->draw_gui();
@@ -383,12 +371,12 @@ int Visualizer::add_box(Vector3 position, Quaternion orientation, Color color, f
 {
     Mesh cube_mesh = GenMeshCube(width, height, length);
     Model cube = LoadModelFromMesh(cube_mesh);
-    VisualObject cube_vis_object = {
+    std::shared_ptr<VisualObject> cube_vis_object = std::make_shared<VisualObject>(VisualObject{
         .position = position,
         .orientation = orientation,
         .model = cube,
         .color = color,
-        .group_id = group_id};
+        .group_id = group_id});
 
     return this->add_visual_object(cube_vis_object);
 }
@@ -397,12 +385,12 @@ int Visualizer::add_sphere(Vector3 position, Quaternion orientation, Color color
 {
     Mesh sphere_mesh = GenMeshSphere(radius, 16, 16);
     Model sphere = LoadModelFromMesh(sphere_mesh);
-    VisualObject sphere_vis_object = {
+    std::shared_ptr<VisualObject> sphere_vis_object = std::make_shared<VisualObject>(VisualObject{
         .position = position,
         .orientation = orientation,
         .model = sphere,
         .color = color,
-        .group_id = group_id};
+        .group_id = group_id});
 
     return this->add_visual_object(sphere_vis_object);
 }
@@ -413,12 +401,12 @@ int Visualizer::add_cylinder(Vector3 position, Quaternion orientation, Color col
 
     Model cylinder = LoadModelFromMesh(cylinder_mesh);
     cylinder.transform = MatrixMultiply(MatrixTranslate(0, -height * 0.5, 0), MatrixRotateX(PI / 2));
-    VisualObject cylinder_vis_object = {
+    std::shared_ptr<VisualObject> cylinder_vis_object = std::make_shared<VisualObject>(VisualObject{
         .position = position,
         .orientation = orientation,
         .model = cylinder,
         .color = color,
-        .group_id = group_id};
+        .group_id = group_id});
 
     return this->add_visual_object(cylinder_vis_object);
 }
@@ -444,12 +432,12 @@ int Visualizer::add_cone(Vector3 position, Quaternion orientation, Color color, 
 {
     Mesh cone_mesh = GenMeshCone(radius, height, 16);
     Model cone = LoadModelFromMesh(cone_mesh);
-    VisualObject cone_vis_object = {
+    std::shared_ptr<VisualObject> cone_vis_object = std::make_shared<VisualObject>(VisualObject{
         .position = position,
         .orientation = orientation,
         .model = cone,
         .color = color,
-        .group_id = group_id};
+        .group_id = group_id});
 
     return this->add_visual_object(cone_vis_object);
 }
@@ -458,17 +446,17 @@ int Visualizer::add_plane(Vector3 position, Quaternion orientation, Color color,
 {
     Mesh plane_mesh = GenMeshPlane(width, length, 16, 16);
     Model plane = LoadModelFromMesh(plane_mesh);
-    VisualObject plane_vis_object = {
+    std::shared_ptr<VisualObject> plane_vis_object = std::make_shared<VisualObject>(VisualObject{
         .position = position,
         .orientation = orientation,
         .model = plane,
         .color = color,
-        .group_id = group_id};
+        .group_id = group_id});
 
     if (this->shader_loaded_)
     {
         this->shadow_texture = LoadRenderTexture(400, 400);
-        plane_vis_object.model.materials[0].maps[RL_SHADER_LOC_MAP_ALBEDO].texture = this->shadow_texture.texture;
+        plane_vis_object->model.materials[0].maps[RL_SHADER_LOC_MAP_ALBEDO].texture = this->shadow_texture.texture;
     }
 
     return this->add_visual_object(plane_vis_object);
@@ -478,12 +466,12 @@ int Visualizer::add_mesh(const char *filename, Vector3 position, Quaternion orie
 {
     Model model = LoadModel(filename);
     model.transform = MatrixScale(scale, scale, scale);
-    VisualObject vis_object = {
+    std::shared_ptr<VisualObject> vis_object = std::make_shared<VisualObject>(VisualObject{
         .position = position,
         .orientation = orientation,
         .model = model,
         .color = color,
-        .group_id = group_id};
+        .group_id = group_id});
 
     return this->add_visual_object(vis_object);
 }
@@ -493,12 +481,12 @@ int Visualizer::add_mesh(const char *filename, Vector3 position, Quaternion orie
 {
     Model model = LoadModel(filename);
     model.transform = MatrixScale(scale_x, scale_y, scale_z);
-    VisualObject vis_object = {
+    std::shared_ptr<VisualObject> vis_object = std::make_shared<VisualObject>(VisualObject{
         .position = position,
         .orientation = orientation,
         .model = model,
         .color = color,
-        .group_id = group_id};
+        .group_id = group_id});
 
     return this->add_visual_object(vis_object);
 }
@@ -533,12 +521,12 @@ int Visualizer::add_heightmap(Vector3 position,
 
     model.transform = MatrixMultiply(MatrixTranslate(-x_shift, 0, -y_shift), MatrixRotateX(PI / 2));
 
-    VisualObject vis_object = {
+    std::shared_ptr<VisualObject> vis_object = std::make_shared<VisualObject>(VisualObject{
         .position = position,
         .orientation = orientation,
         .model = model,
         .color = color,
-        .group_id = group_id};
+        .group_id = group_id});
 
     return this->add_visual_object(vis_object);
 };
@@ -615,9 +603,9 @@ void Visualizer::assing_lighting_to_models()
     if (this->shader_loaded_)
     {
 
-        for (VisualObject &vis_object : this->visual_objects_)
+        for (std::shared_ptr<VisualObject> vis_object : this->visual_objects_)
         {
-            vis_object.model.materials[0].shader = this->shaders_["light"];
+            vis_object->model.materials[0].shader = this->shaders_["light"];
         }
     }
 }
@@ -646,7 +634,7 @@ void Visualizer::close()
     // Unload all the models
     for (auto &vis_object : this->visual_objects_)
     {
-        UnloadModel(vis_object.model);
+        UnloadModel(vis_object->model);
     }
     rlImGuiShutdown();
     UnloadRenderTexture(this->shader_target_);
@@ -658,7 +646,7 @@ void Visualizer::unload_models(void)
     // Unload all the models
     for (auto &vis_object : this->visual_objects_)
     {
-        UnloadModel(vis_object.model);
+        UnloadModel(vis_object->model);
     }
 
     this->visual_objects_ = {};
@@ -671,6 +659,7 @@ void Visualizer::set_imgui_interfaces(std::function<void(void)> func)
 
 int Visualizer::select_visual_object()
 {
+    if (this->visual_objects_.size() == 0){return -1;}
     // Static variables to track the double click
     static bool double_click = true;
     static float double_click_time = 0.0f;
@@ -688,7 +677,7 @@ int Visualizer::select_visual_object()
         for (const auto &obj : this->visual_objects_)
         {
             // Note that this works because we use single mesh models.
-            RayCollision collision = GetRayCollisionMesh(ray, obj.model.meshes[0], du::get_transform(obj.position, obj.orientation));
+            RayCollision collision = GetRayCollisionMesh(ray, obj->model.meshes[0], du::get_transform(obj->position, obj->orientation));
 
             if (collision.hit && collision.distance < nearest_collision_distance)
             {
@@ -714,49 +703,49 @@ int Visualizer::select_visual_object()
     return this->focused_object_index_;
 }
 
-void Visualizer::render_visual_object(const VisualObject &vis_object)
+void Visualizer::render_visual_object(std::shared_ptr<VisualObject> vis_object)
 {
     // Get the rotation axis and angle from the quaternion
     Vector3 axis;
     float angle;
-    QuaternionToAxisAngle(vis_object.orientation, &axis, &angle);
+    QuaternionToAxisAngle(vis_object->orientation, &axis, &angle);
     angle = angle * 180 / 3.1415926535;
     if (this->wireframe_mode_)
     {
-        DrawModelWiresEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, vis_object.color);
+        DrawModelWiresEx(vis_object->model, vis_object->position, axis, angle, {1.0f, 1.0f, 1.0f}, vis_object->color);
     }
     else
     {
-        DrawModelEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, vis_object.color);
+        DrawModelEx(vis_object->model, vis_object->position, axis, angle, {1.0f, 1.0f, 1.0f}, vis_object->color);
         // Draw wireframe with a small offset in the color (make it darker)
-        Color wireColor = {(unsigned char)(vis_object.color.r * 0.7f),
-                           (unsigned char)(vis_object.color.g * 0.7f),
-                           (unsigned char)(vis_object.color.b * 0.7f), 255};
-        DrawModelWiresEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, wireColor);
+        Color wireColor = {(unsigned char)(vis_object->color.r * 0.7f),
+                           (unsigned char)(vis_object->color.g * 0.7f),
+                           (unsigned char)(vis_object->color.b * 0.7f), 255};
+        DrawModelWiresEx(vis_object->model, vis_object->position, axis, angle, {1.0f, 1.0f, 1.0f}, wireColor);
     }
 
     if (this->show_bodies_coordinate_frame_)
     {
-        du::draw_axes(vis_object.position, vis_object.orientation);
+        du::draw_axes(vis_object->position, vis_object->orientation, this->axes_size);
     }
 }
 
-void Visualizer::render_visual_object_shadow(const VisualObject &vis_object)
-{
-    // Get the rotation axis and angle from the quaternion
-    Vector3 axis;
-    float angle;
-    QuaternionToAxisAngle(vis_object.orientation, &axis, &angle);
-    angle = angle * 180 / 3.1415926535;
-    if (this->wireframe_mode_)
-    {
-        DrawModelWiresEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, DARKGRAY);
-    }
-    else
-    {
-        DrawModelEx(vis_object.model, vis_object.position, axis, angle, {1.0f, 1.0f, 1.0f}, DARKGRAY);
-    }
-}
+// void Visualizer::render_visual_object_shadow(const VisualObject &vis_object)
+// {
+//     // Get the rotation axis and angle from the quaternion
+//     Vector3 axis;
+//     float angle;
+//     QuaternionToAxisAngle(vis_object->orientation, &axis, &angle);
+//     angle = angle * 180 / 3.1415926535;
+//     if (this->wireframe_mode_)
+//     {
+//         DrawModelWiresEx(vis_object->model, vis_object->position, axis, angle, {1.0f, 1.0f, 1.0f}, DARKGRAY);
+//     }
+//     else
+//     {
+//         DrawModelEx(vis_object->model, vis_object->position, axis, angle, {1.0f, 1.0f, 1.0f}, DARKGRAY);
+//     }
+// }
 
 void Visualizer::disable_visual_object_group_rendering(int group_id)
 {

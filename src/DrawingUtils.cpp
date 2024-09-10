@@ -13,9 +13,9 @@ namespace du
         DrawCylinderEx(tip_start_pos, end_position, radius * 2.0, 0.01 * radius, 20, color);
     }
 
-    void draw_axes(Vector3 position, Quaternion orientation)
+    void draw_axes(Vector3 position, Quaternion orientation, float scale)
     {
-        float lenght = 1.0;
+        float lenght = 1.0 * (scale < 0.0 ? 0.0 : scale);
         float radius = lenght * 0.03;
         orientation = QuaternionNormalize(orientation);
         draw_arrow(position, Vector3Add(position, Vector3RotateByQuaternion({lenght, 0.0, 0.0}, orientation)), RED, radius);

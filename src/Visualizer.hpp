@@ -13,9 +13,9 @@
 #include <functional>
 #include <map>
 #include <set>
+#include <memory>
+
 #include "DrawingUtils.hpp"
-// #include <sstream>
-// #include <iomanip>
 #define GLSL_VERSION 330
 
 /**
@@ -95,9 +95,9 @@ private:
     Camera shadow_map_camera;               // Camera for viewing the scene.
     std::map<std::string, Shader> shaders_; // Shaders for rendering
     RenderTexture2D shadow_texture;         // Texture for shadows (NOT IMPLMENETED YET)
-    Shader base_shader_;
+
     bool shader_loaded_ = false;                               // Flag indicating whether the shader is loaded.
-    std::vector<VisualObject> visual_objects_;                 // List of visual objects in the scene.
+    std::vector<std::shared_ptr<VisualObject>> visual_objects_;                 // List of visual objects in the scene.
     std::vector<bool> disabled_groups = std::vector<bool>(10); // List of group ids of objects that will not be rendered this frame.
     std::queue<VisSphere> spheres_;                            // List of points in the scene.
     std::queue<Line> lines_;                                   // Queue of lines to be drawn.
@@ -118,7 +118,7 @@ private:
                                                                      { return; }};
     
     float camera_speed_ = 0.3;
-
+    float axes_size = 1.0;
 public:
     /**
      * @brief Constructor for the Visualizer class.
@@ -188,12 +188,12 @@ public:
     /**
      * @brief draws a visual object
      */
-    void render_visual_object(const VisualObject &vis_object);
+    void render_visual_object(std::shared_ptr<VisualObject> vis_object);
 
-    /**
-     * @brief Rednders the visual objects shadows (NOT IMPLEMENTED)
-     */
-    void render_visual_object_shadow(const VisualObject &vis_object);
+    // /**
+    //  * @brief Rednders the visual objects shadows (NOT IMPLEMENTED)
+    //  */
+    // void render_visual_object_shadow(const VisualObject &vis_object);
 
     // Shader (Not in use)
     /**
@@ -209,7 +209,7 @@ public:
      * @param vis_object The visual object to be added.
      * @return The index of the added visual object.
      */
-    int add_visual_object(VisualObject vis_object);
+    int add_visual_object(std::shared_ptr<VisualObject>  vis_object);
 
     /**
      * @brief Updates the position, orientation, and scale of a visual object.
