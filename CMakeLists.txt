@@ -26,16 +26,10 @@ set(RAYMGUI_SOURCES
     thirdParty/rlImGui/rlImGui.cpp
 )
 
-set(ROBO_VIS_SOURCES
-    src/DrawingUtils.cpp
-    src/Visualizer.cpp
-    
-)
-
 set(SOURCES
     src/DrawingUtils.cpp
     src/Visualizer.cpp
-    
+    src/Visualizer_visual_objects.cpp
 )
 
 
@@ -47,7 +41,7 @@ add_compile_definitions(SHADER_BASE_PATH="${CMAKE_SOURCE_DIR}/src/RoboVis/shader
 
 add_library(${PROJECT_NAME} ${SOURCES} ${IMGUI_SOURCES} ${RAYMGUI_SOURCES} ${RLIGHTS_SOURCES})
 
-add_executable(SpringMassSimulation ${EXAMPLE_SOURCES} ${ROBO_VIS_SOURCES} ${IMGUI_SOURCES} ${RAYMGUI_SOURCES} ${RLIGHTS_SOURCES})
+add_executable(SpringMassSimulation ${EXAMPLE_SOURCES} ${SOURCES} ${IMGUI_SOURCES} ${RAYMGUI_SOURCES} ${RLIGHTS_SOURCES})
 
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
