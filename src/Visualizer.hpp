@@ -41,6 +41,17 @@ struct Line
 };
 
 /**
+ * @brief Represents a 3D segement with a starting position, ending position, and color.
+ */
+struct Segment
+{
+    Vector3 start_pos; // Start position of the line.
+    Vector3 end_pos;   // End position of the line.
+    float scale;       // Scale of the segement (thickness parameter)
+    Color color;       // Color of the line.
+};
+
+/**
  * @brief Represents a 3D sphere with a position, radius and color.
  */
 struct VisSphere
@@ -99,9 +110,10 @@ private:
     bool shader_loaded_ = false;                               // Flag indicating whether the shader is loaded.
     std::vector<std::shared_ptr<VisualObject>> visual_objects_;                 // List of visual objects in the scene.
     std::vector<bool> disabled_groups = std::vector<bool>(10); // List of group ids of objects that will not be rendered this frame.
-    std::queue<VisSphere> spheres_;                            // List of points in the scene.
-    std::queue<Line> lines_;                                   // Queue of lines to be drawn.
+    std::queue<VisSphere> spheres_;                            // Buffer of points in the scene.
+    std::queue<Line> lines_;                                   // Buffer of lines to be drawn.
     std::queue<Arrow> arrows_;                                 // Buffer of arrows to be drawn.
+    std::queue<Segment> segments_;                             // Buffer for line segments to be dranw in the current frame
     std::queue<TextLabel> text_labels_buffer_;                 // Buffer for text labels to be drawn.
     std::queue<AxisAlignedBoundingBox> aabb_buffer_;           // Buffer for AABB  to be drawn.
     std::map<int, TextLabel> text_labels_;                     // Map of text labels with their indices.
@@ -413,11 +425,22 @@ public:
     /**
      * @brief Draws an sphere (temporarily)
      *
-     * @param min min value of the axis aligned bounding box.
-     * @param max max value of the axis aligned bounding box.
-     * @param color Color of the bounding box.
+     * @param position Position of the sphere center
+     * @param radius Radius of the sphere.
+     * @param color Color of the sphere
      */
     void draw_sphere(Vector3 position, float radius, Color color = RED);
+
+
+    /**
+     * @brief Draws 3D line segment representation
+     *
+     * @param p_1 First point of the segment
+     * @param p_2 Second point of the segment
+     * @param scale Parameter that controls the thickness of the segment
+     * @param color Color segment
+     */
+    void draw_segment(Vector3 p_1, Vector3 p_2, float scale, Color color = BLUE);
 
     /**
      * @brief Adds a text label to the scene with specified parameters.

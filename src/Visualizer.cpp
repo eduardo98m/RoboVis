@@ -220,6 +220,15 @@ void Visualizer::update()
         DrawSphere(sphere.position, sphere.radius, sphere.color);
         this->spheres_.pop();
     }
+
+    // Draw The segments
+    while (!this->segments_.empty())
+    {
+        Segment segment = this->segments_.front();
+        du::draw_segment(segment.start_pos, segment.end_pos,  segment.color, segment.scale);
+        this->segments_.pop();
+    }
+
     // Draw Arrows
     while (!this->arrows_.empty())
     {
@@ -328,6 +337,16 @@ void Visualizer::draw_line(Vector3 start_pos, Vector3 end_pos, Color color)
         end_pos,
         color};
     this->lines_.push(line);
+}
+
+void Visualizer::draw_segment(Vector3 p_1, Vector3 p_2, float scale,Color color)
+{
+    Segment segment = {
+        p_1,
+        p_2,
+        scale,
+        color};
+    this->segments_.push(segment);
 }
 
 void Visualizer::draw_sphere(Vector3 position, float radius, Color color)

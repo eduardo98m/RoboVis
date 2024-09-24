@@ -22,6 +22,16 @@ namespace du
         draw_arrow(position, Vector3Add(position, Vector3RotateByQuaternion({0.0, lenght, 0.0}, orientation)), GREEN, radius);
         draw_arrow(position, Vector3Add(position, Vector3RotateByQuaternion({0.0, 0.0, lenght}, orientation)), BLUE, radius);
     }
+    
+    void draw_segment(Vector3 p_1, Vector3 p_2, Color color, float scale)
+    {
+        float radius = scale * 0.03;
+
+        DrawCylinderEx(p_1, p_2, radius, radius, 10, color);
+        DrawSphere(p_1, radius * 1.5, color);
+        DrawSphere(p_2, radius * 1.5, color);
+
+    }
 
     Matrix get_transform(const Vector3 &v, const Quaternion &q){
         Vector3 axis;
