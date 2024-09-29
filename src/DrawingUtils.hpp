@@ -16,5 +16,7 @@ namespace du
     */
     void draw_segment(Vector3 p_1, Vector3 p_2, Color color, float scale);
 
+    void draw_disc_section(Vector3 position, Vector3 axis, float radius, Color color);
+
     Matrix get_transform(const Vector3 &v, const Quaternion &q);
 }

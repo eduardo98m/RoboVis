@@ -229,6 +229,7 @@ void Visualizer::update()
         this->segments_.pop();
     }
 
+    
     // Draw Arrows
     while (!this->arrows_.empty())
     {
@@ -244,7 +245,16 @@ void Visualizer::update()
         this->aabb_buffer_.pop();
     }
 
+    // Draw The discs
+    while (!this->discs_.empty())
+    {
+        Disc disc = this->discs_.front();
+        disc.draw();
+        this->discs_.pop();
+    }
+
     EndMode3D();
+
 
     // Draw the text on the normal labels
     for (const auto &[_, label] : this->text_labels_)
@@ -347,6 +357,18 @@ void Visualizer::draw_segment(Vector3 p_1, Vector3 p_2, float scale,Color color)
         scale,
         color};
     this->segments_.push(segment);
+}
+
+void Visualizer::draw_disc(Vector3 center, Vector3 axis, float radius, Color color){
+    
+    Disc disc = {
+        .center = center,
+        .axis = axis,
+        .radius = radius,
+        .color = color
+    };
+    
+    this->discs_.push(disc);
 }
 
 void Visualizer::draw_sphere(Vector3 position, float radius, Color color)

@@ -52,6 +52,37 @@ struct Segment
 };
 
 /**
+ * @brief Represents a 2D disc drawn in 3D space
+ */
+struct Disc
+{
+    Vector3 center; // Start position of the line.
+    Vector3 axis;   // End position of the line.
+    float radius;   // Radius of the ring
+    Color color = GREEN;    // Color of the disc.
+
+    void draw()
+    {
+        du::draw_disc_section(center, axis, radius, this->color);
+    }
+};
+
+/**
+ * @brief Represents a 2D disc drawn in 3D space
+ */
+struct RingSection
+{
+    Vector3 center; // Start position of the line.
+    Vector3 axis;   // End position of the line.
+    
+    float outer_radius;   // Radius of the ring
+    float inner_radius;   // Radius of the ring
+    float angle;
+    Color color = GREEN;    // Color of the disc.
+
+};
+
+/**
  * @brief Represents a 3D sphere with a position, radius and color.
  */
 struct VisSphere
@@ -107,30 +138,32 @@ private:
     std::map<std::string, Shader> shaders_; // Shaders for rendering
     RenderTexture2D shadow_texture;         // Texture for shadows (NOT IMPLMENETED YET)
 
-    bool shader_loaded_ = false;                               // Flag indicating whether the shader is loaded.
-    std::vector<std::shared_ptr<VisualObject>> visual_objects_;                 // List of visual objects in the scene.
-    std::vector<bool> disabled_groups = std::vector<bool>(10); // List of group ids of objects that will not be rendered this frame.
-    std::queue<VisSphere> spheres_;                            // Buffer of points in the scene.
-    std::queue<Line> lines_;                                   // Buffer of lines to be drawn.
-    std::queue<Arrow> arrows_;                                 // Buffer of arrows to be drawn.
-    std::queue<Segment> segments_;                             // Buffer for line segments to be dranw in the current frame
-    std::queue<TextLabel> text_labels_buffer_;                 // Buffer for text labels to be drawn.
-    std::queue<AxisAlignedBoundingBox> aabb_buffer_;           // Buffer for AABB  to be drawn.
-    std::map<int, TextLabel> text_labels_;                     // Map of text labels with their indices.
-    bool wireframe_mode_;                                      // Flag indicating whether to render in wireframe mode.
-    int focused_object_index_;                                 // Index of the focused visual object.
-    int previously_focused_object_index_ = -2;                 // Index of the previously focused visual object.
-    bool focus_mode_ = false;                                  // Flag indicating whether the focus mode is enabled.
-    RenderTexture2D shader_target_;                            // Render target for shaders.
-    Light light_;                                              // Lighting setup for the scene.
-    bool show_bodies_coordinate_frame_ = false;                // Flag indicating whether to show coordinate frames for bodies.
+    bool shader_loaded_ = false;                                // Flag indicating whether the shader is loaded.
+    std::vector<std::shared_ptr<VisualObject>> visual_objects_; // List of visual objects in the scene.
+    std::vector<bool> disabled_groups = std::vector<bool>(10);  // List of group ids of objects that will not be rendered this frame.
+    std::queue<VisSphere> spheres_;                             // Buffer of points in the scene.
+    std::queue<Line> lines_;                                    // Buffer of lines to be drawn.
+    std::queue<Arrow> arrows_;                                  // Buffer of arrows to be drawn.
+    std::queue<Segment> segments_;                              // Buffer for line segments to be drawn in the current frame
+    std::queue<Disc> discs_;                                    // Buffer for discs to be drawn in the current frame
+    std::queue<TextLabel> text_labels_buffer_;                  // Buffer for text labels to be drawn.
+    std::queue<AxisAlignedBoundingBox> aabb_buffer_;            // Buffer for AABB  to be drawn.
+    std::map<int, TextLabel> text_labels_;                      // Map of text labels with their indices.
+    bool wireframe_mode_;                                       // Flag indicating whether to render in wireframe mode.
+    int focused_object_index_;                                  // Index of the focused visual object.
+    int previously_focused_object_index_ = -2;                  // Index of the previously focused visual object.
+    bool focus_mode_ = false;                                   // Flag indicating whether the focus mode is enabled.
+    RenderTexture2D shader_target_;                             // Render target for shaders.
+    Light light_;                                               // Lighting setup for the scene.
+    bool show_bodies_coordinate_frame_ = false;                 // Flag indicating whether to show coordinate frames for bodies.
 
     // Function to define ImGui interfaces; initialized as a no-op.
     std::vector<std::function<void(void)>> imgui_interfaces_calls = {[](void) -> void
                                                                      { return; }};
-    
+
     float camera_speed_ = 0.3;
     float axes_size = 1.0;
+
 public:
     /**
      * @brief Constructor for the Visualizer class.
@@ -221,7 +254,7 @@ public:
      * @param vis_object The visual object to be added.
      * @return The index of the added visual object.
      */
-    int add_visual_object(std::shared_ptr<VisualObject>  vis_object);
+    int add_visual_object(std::shared_ptr<VisualObject> vis_object);
 
     /**
      * @brief Updates the position, orientation, and scale of a visual object.
@@ -368,7 +401,7 @@ public:
                       Color color,
                       size_t width,
                       size_t height,
-                      const std::vector<float>& data,
+                      const std::vector<float> &data,
                       float x_scale,
                       float y_scale,
                       float z_scale,
@@ -431,7 +464,6 @@ public:
      */
     void draw_sphere(Vector3 position, float radius, Color color = RED);
 
-
     /**
      * @brief Draws 3D line segment representation
      *
@@ -441,6 +473,16 @@ public:
      * @param color Color segment
      */
     void draw_segment(Vector3 p_1, Vector3 p_2, float scale, Color color = BLUE);
+
+    /**
+     * @brief Draws a 2D disc in 3D space
+     *
+     * @param center Center of the disc
+     * @param axis Axis of the disc (facing direction)
+     * @param radius Radius
+     * @param color Color of the disc
+     */
+    void draw_disc(Vector3 center, Vector3 axis, float radius, Color color = DARKGREEN);
 
     /**
      * @brief Adds a text label to the scene with specified parameters.
