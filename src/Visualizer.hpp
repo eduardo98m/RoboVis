@@ -56,10 +56,10 @@ struct Segment
  */
 struct Disc
 {
-    Vector3 center; // Start position of the line.
-    Vector3 axis;   // End position of the line.
-    float radius;   // Radius of the ring
-    Color color = GREEN;    // Color of the disc.
+    Vector3 center;      // Start position of the line.
+    Vector3 axis;        // End position of the line.
+    float radius;        // Radius of the ring
+    Color color = GREEN; // Color of the disc.
 
     void draw()
     {
@@ -72,14 +72,18 @@ struct Disc
  */
 struct RingSection
 {
-    Vector3 center; // Start position of the line.
-    Vector3 axis;   // End position of the line.
-    
-    float outer_radius;   // Radius of the ring
-    float inner_radius;   // Radius of the ring
-    float angle;
-    Color color = GREEN;    // Color of the disc.
+    Vector3 center;      // Start position of the line.
+    Vector3 axis;        // End position of the line.
+    float inner_radius;  // Radius of the ring
+    float outer_radius;  // Radius of the ring
+    float angle_f;       // Final angle
+    float angle_o;       // Initial angle
+    Color color = GREEN; // Color of the disc.
 
+    void draw()
+    {
+        du::draw_ring_section(center, axis, outer_radius, inner_radius, angle_f, angle_o, color);
+    }
 };
 
 /**
@@ -148,6 +152,7 @@ private:
     std::queue<Disc> discs_;                                    // Buffer for discs to be drawn in the current frame
     std::queue<TextLabel> text_labels_buffer_;                  // Buffer for text labels to be drawn.
     std::queue<AxisAlignedBoundingBox> aabb_buffer_;            // Buffer for AABB  to be drawn.
+    std::queue<RingSection> ring_sections_;                     // Buffer for Ring Sections to be drawn.
     std::map<int, TextLabel> text_labels_;                      // Map of text labels with their indices.
     bool wireframe_mode_;                                       // Flag indicating whether to render in wireframe mode.
     int focused_object_index_;                                  // Index of the focused visual object.
@@ -483,6 +488,24 @@ public:
      * @param color Color of the disc
      */
     void draw_disc(Vector3 center, Vector3 axis, float radius, Color color = DARKGREEN);
+
+    /**
+     * @brief Draws a 2D Ring section in 3D space (sends it to the buffer)
+     * @param position : Center of the ring
+     * @param axis : Axis to wich the ring faces
+     * @param r_1 : Smaller radius of the ring
+     * @param r_2 : Bigger radius of the ring
+     * @param angle_f : Final angle from where the ring section is drawn
+     * @param angle_o : Staring angle from where the ring section is draw
+     * @param color : Color of the segment
+     */
+    void draw_ring_section(Vector3 position,
+                           Vector3 axis,
+                           float r_1,
+                           float r_2,
+                           float angle_f = 2 * PI,
+                           float angle_o = 0.0,
+                           Color color = DARKGREEN);
 
     /**
      * @brief Adds a text label to the scene with specified parameters.

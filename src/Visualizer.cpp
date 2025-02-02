@@ -253,6 +253,13 @@ void Visualizer::update()
         this->discs_.pop();
     }
 
+    // Draw the rings:
+    while(!this->ring_sections_.empty()){
+        RingSection ring = this->ring_sections_.front();
+        ring.draw();
+        this->ring_sections_.pop();
+    }
+
     EndMode3D();
 
 
@@ -369,6 +376,28 @@ void Visualizer::draw_disc(Vector3 center, Vector3 axis, float radius, Color col
     };
     
     this->discs_.push(disc);
+}
+
+void Visualizer::draw_ring_section(Vector3 position,
+                           Vector3 axis,
+                           float r_1,
+                           float r_2,
+                           float angle_f,
+                           float angle_o,
+                           Color color){
+    
+    RingSection ring_sec = {
+        .center = position,
+        .axis = axis,
+        .inner_radius = r_1,
+        .outer_radius = r_2,
+        .angle_f = angle_f,
+        .angle_o = angle_o,
+        .color = color
+    };
+
+    this->ring_sections_.push(ring_sec);
+
 }
 
 void Visualizer::draw_sphere(Vector3 position, float radius, Color color)
