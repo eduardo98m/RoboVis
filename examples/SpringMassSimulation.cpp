@@ -31,7 +31,7 @@ int main() {
 
     Vector3 ref_pos = {0.0f, 4.0f, 0.0f};
     // A reference point for the spring
-    uint cylinder_id = visualizer.add_cylinder(ref_pos, QuaternionIdentity(), GREEN, 1.0f, 0.5f);
+    uint cylinder_id = visualizer.add_cylinder(ref_pos, QuaternionFromAxisAngle({1.0, 0.0, 0.0}, PI/2), GREEN, 1.0f, 0.5f);
 
     Vector3 spring_pos  = Vector3Scale(Vector3Add(pos, ref_pos), 0.5f);
     // Now lets create a spring which will be a cylinder, the spring will be attached to the box and the reference point

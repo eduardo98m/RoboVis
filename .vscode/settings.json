@@ -65,6 +65,12 @@
         "sstream": "cpp",
         "stop_token": "cpp",
         "thread": "cpp",
-        "typeindex": "cpp"
+        "typeindex": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp",
+        "__nullptr": "cpp",
+        "__node_handle": "cpp",
+        "__split_buffer": "cpp",
+        "*.tpp": "cpp"
     }
 }
