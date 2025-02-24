@@ -75,6 +75,7 @@ namespace rbvs
         std::optional<Quaternion> orientation{}; ///< Optional new orientation.
         std::optional<Vector3> scale{};          ///< Optional new scale.
         std::optional<Color> color{};          ///< Color (RGBA format).
+        std::optional<bool> visible{};
     };
 
 } // namespace rbvs

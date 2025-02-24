@@ -31,6 +31,7 @@ set(SYSTEMS_SOURCES
     "src/Systems/UserCameraInput.cpp"
     "src/Systems/Rendering/Rendering.cpp"
     "src/Systems/Rendering/VisualModelRendering.cpp"
+    "src/Systems/GUI/EntitySettings.cpp"
 )
 
 

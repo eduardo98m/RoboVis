@@ -6,7 +6,10 @@ namespace rbvs{
         auto view = em.view<VisualModel>();
         
         for(auto entity : view) {
+            
             auto& vm = em.getComponent<VisualModel>(entity);
+
+            if (!vm.visible) continue;
             
             Vector3 axis;
             float angle;

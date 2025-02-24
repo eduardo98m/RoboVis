@@ -16,6 +16,7 @@ namespace rbvs
         Vector3 scale;
         Color color;
         std::unique_ptr<Model> model;
+        bool visible = true;
     };
 
 

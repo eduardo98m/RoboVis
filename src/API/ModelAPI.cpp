@@ -55,10 +55,12 @@ namespace rbvs
     {
         // TODO : We need a way to avoid getting empty components (i.e. the entity doenst have the component)
         VisualModel &vm = this->entity_manager.getComponent<VisualModel>(params.entity);
+        
         if (params.position) vm.position = *params.position;
         if (params.orientation) vm.orientation = *params.orientation;
         if (params.scale) vm.scale = *params.scale;
-        if (params.color) vm.color = *params.color;       
+        if (params.color) vm.color = *params.color; 
+        if (params.visible) vm.visible = *params.visible;      
     }
 
     void Visualizer::delete_model(Entity entity)

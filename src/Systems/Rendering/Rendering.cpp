@@ -11,7 +11,10 @@ namespace rbvs
         BeginMode3D(camera);
         visual_model_renderer.update(em);
         EndMode3D();
+        rlImGuiBegin();
         //processUI(em);
+        entity_setting_system.render_gui(em);
+        rlImGuiEnd();
         EndDrawing();
         
     }

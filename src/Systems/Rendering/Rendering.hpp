@@ -2,6 +2,10 @@
 #include "ECS/EntityManager.hpp"
 #include "Components/Base.hpp"
 #include "Systems/Rendering/VisualModelRendering.hpp"
+#include "Systems/GUI/EntitySettings.hpp"
+#include "rlImGui.h"
+
+
 
 namespace rbvs {
 
@@ -16,6 +20,7 @@ namespace rbvs {
     
     private:
         VisualModelRenderingSystem visual_model_renderer;
+        EntitySettingsSystem entity_setting_system;
     };
 
 } // namespace rbvs

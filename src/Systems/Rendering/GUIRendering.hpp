@@ -1,4 +1,6 @@
 #pragma once
+// Imgui
+#include "imgui.h"
 // Raylib
 #include "rlImGui.h"
 // Standard Library

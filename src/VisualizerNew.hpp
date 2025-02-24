@@ -19,6 +19,7 @@
 // Internal - Systems
 #include "Systems/Rendering/Rendering.hpp"
 #include "Systems/UserCameraInput.hpp"
+#include "Systems/GUI/EntitySettings.hpp"
 
 // Internal - API
 #include "API/Model.hpp"
