@@ -2,6 +2,7 @@
 // Raylib
 #include<raylib.h>
 #include<raymath.h>
+#include<rlgl.h>
 // Internal
 #include "ECS/EntityManager.hpp"
 #include "Components/Base.hpp"
