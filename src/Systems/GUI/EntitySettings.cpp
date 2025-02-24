@@ -4,10 +4,8 @@ namespace rbvs
 {
     void EntitySettingsSystem::render_gui(EntityManager &em)
     {
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_Modal;
-        // ImGui::Begin("Main Window", nullptr, window_flags);
 
-        ImGui::Begin("Entities", nullptr, window_flags);
+        ImGui::Begin("Entities");
         ImGui::Text("Visualizer");
         auto view = em.view<VisualModel>();
 
