@@ -10,35 +10,76 @@ int main() {
     rbvs::Visualizer visualizer = rbvs::Visualizer(1208, 720, "RoboVis");
     
     
-    rbvs::Entity sphere_entity = visualizer.create_model(
-        rbvs::ModelParams{
-            .scale = {2.0, 0.1, 0.4},
-            .color = GREEN,
-            .model_type = rbvs::ModelType::SPHERE,
-            .radius = 2.0,
+    // rbvs::Entity sphere_entity = visualizer.create_model(
+    //     rbvs::ModelParams{
+    //         .scale = {2.0, 0.1, 0.4},
+    //         .color = GREEN,
+    //         .model_type = rbvs::ModelType::SPHERE,
+    //         .radius = 2.0,
             
-        }
-    );
+    //     }
+    // );
 
 
-    rbvs::Entity cube_entity = visualizer.create_model(
-        rbvs::ModelParams{
-            .position = {0.0, 0.0, 0.0},
-            .color = {255, 0 , 0,  50},
-            .model_type = rbvs::ModelType::BOX,
-            .half_extents = Vector3{1.0, 2.0, 3.0},
-        }
-    );
+    // rbvs::Entity cube_entity = visualizer.create_model(
+    //     rbvs::ModelParams{
+    //         .position = {0.0, 0.0, 0.0},
+    //         .color = {255, 0 , 0,  50},
+    //         .model_type = rbvs::ModelType::BOX,
+    //         .half_extents = Vector3{1.0, 2.0, 3.0},
+    //     }
+    // );
+
+    // rbvs::Entity cylinder_entity = visualizer.create_model(
+    //     rbvs::ModelParams{
+    //         .position = {0.0, 0.0, 0.0},
+    //         .color = {255, 0 , 255,  50},
+    //         .model_type = rbvs::ModelType::CYLINDER,
+    //         .radius = 1.0,
+    //         .length = 5.0,
+    //     }
+    // );
 
     rbvs::Entity cylinder_entity = visualizer.create_model(
-        rbvs::ModelParams{
-            .position = {0.0, 0.0, 0.0},
-            .color = {255, 0 , 255,  50},
-            .model_type = rbvs::ModelType::CYLINDER,
-            .radius = 1.0,
-            .length = 5.0,
-        }
-    );
+            rbvs::ModelParams{
+                .position = {1.0, 0.0, 1.0},
+                .color = {255, 0 , 0,  255},
+                .model_type = rbvs::ModelType::CYLINDER,
+                .radius = 0.1,
+                .length = 5.0,
+            }
+        );
+
+    visualizer.create_model(
+            rbvs::ModelParams{
+                .position = {1.0, 0.0, -1.0},
+                .color = {255, 0 , 0,  255},
+                .model_type = rbvs::ModelType::CYLINDER,
+                .radius = 0.1,
+                .length = 5.0,
+            }
+        );
+    
+        visualizer.create_model(
+            rbvs::ModelParams{
+                .position = {-1.0, 0.0, -1.0},
+                .color = {255, 0 , 0,  255},
+                .model_type = rbvs::ModelType::CYLINDER,
+                .radius = 0.1,
+                .length = 5.0,
+            }
+        );
+
+        visualizer.create_model(
+            rbvs::ModelParams{
+                .position = {-1.0, 0.0, 1.0},
+                .color = {255, 0 , 0,  255},
+                .model_type = rbvs::ModelType::CYLINDER,
+                .radius = 0.1,
+                .length = 5.0,
+            }
+        );
+
 
     rbvs::Entity cone_entity = visualizer.create_model(
         rbvs::ModelParams{
@@ -82,16 +123,16 @@ int main() {
         new_scale.x = 0.3 + sinf(GetTime());
         new_orientation = QuaternionFromEuler(0.0f, GetTime() * rotationSpeed, 0.0f);
 
-        visualizer.update_model(rbvs::ModelUpdateParams{
-            .entity = sphere_entity,
-            .position = std::optional<Vector3>{new_pos},  // <-- semicolon here is invalid
-            .scale = std::optional<Vector3>{new_scale}
-        });
+        // visualizer.update_model(rbvs::ModelUpdateParams{
+        //     .entity = sphere_entity,
+        //     .position = std::optional<Vector3>{new_pos},  // <-- semicolon here is invalid
+        //     .scale = std::optional<Vector3>{new_scale}
+        // });
 
-        if ((GetTime() - t_o) > 5.0) {
-            // Delete the box
-            visualizer.delete_model(cube_entity);
-        }
+        // if ((GetTime() - t_o) > 5.0) {
+        //     // Delete the box
+        //     visualizer.delete_model(cube_entity);
+        // }
 
         // visualizer.update_visual_object_position_orientation(cube_id, new_pos, new_orientation);
 

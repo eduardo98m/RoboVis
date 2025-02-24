@@ -71,6 +71,7 @@
         "__nullptr": "cpp",
         "__node_handle": "cpp",
         "__split_buffer": "cpp",
-        "*.tpp": "cpp"
+        "*.tpp": "cpp",
+        "ios": "cpp"
     }
 }

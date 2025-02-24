@@ -12,6 +12,7 @@ namespace rbvs
         rlImGuiSetup(true); // Setup ImGui
         this->set_up_camera();
         this->pre_load_meshes();
+        this->rendering_system.init();
     };
 
     void Visualizer::set_up_camera()

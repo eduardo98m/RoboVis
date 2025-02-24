@@ -32,6 +32,7 @@ set(SYSTEMS_SOURCES
     "src/Systems/Rendering/Rendering.cpp"
     "src/Systems/Rendering/VisualModelRendering.cpp"
     "src/Systems/GUI/EntitySettings.cpp"
+    "src/Systems/Rendering/ShaderManager.cpp"
 )
 
 
@@ -63,7 +64,7 @@ set(ECS_MAIN
     src/ecs_main.cpp
 )
 
-add_compile_definitions(SHADER_BASE_PATH="${CMAKE_SOURCE_DIR}/src/RoboVis/shaders")
+add_compile_definitions(SHADER_BASE_PATH="${CMAKE_SOURCE_DIR}/shaders")
 
 add_library(${PROJECT_NAME} ${SOURCES} ${IMGUI_SOURCES} ${RAYMGUI_SOURCES} ${RLIGHTS_SOURCES})
 
