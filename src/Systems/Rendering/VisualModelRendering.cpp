@@ -19,8 +19,7 @@ namespace rbvs
             float angle;
             QuaternionToAxisAngle(vm.orientation, &axis, &angle);
 
-            // Actual rendering logic here
-            
+            // Disable the depth mask for transparent models
             if (vm.color.a < 255)rlDisableDepthMask();
             DrawModelEx(*vm.model,
                         vm.position,

@@ -24,9 +24,9 @@ in vec4 LightSpacePos;
 layout(location = 0) out vec4 FragColor;
 
 uniform vec3 gCameraWorldPos;
-uniform float gGridSize = 100.0;
-uniform float gGridMinPixelsBetweenCells = 2.0;
-uniform float gGridCellSize = 0.01;
+uniform float gGridSize; //= 500.0;
+uniform float gGridMinPixelsBetweenCells = 1.25;
+uniform float gGridCellSize = 1.0;
 uniform vec4 gGridColorThin = vec4(0.75, 0.75, 0.75, 1.0);
 uniform vec4 gGridColorThick = vec4(0.86, 0.85, 0.85, 1.0);
 uniform vec3 gLightDirection;
@@ -87,6 +87,23 @@ float CalcShadowFactorBasic(vec3 LightDirection)
         return 1.0;
 }
 
+// vec4 CheckAxis(vec4 Color, vec3 WorldPos, float thickness){
+//     //vec4 Color = vec4(0.0);
+//     if (abs(WorldPos.z) < thickness) {
+//         // Make x-axis red, keep the same alpha
+//         Color =  vec4(1.0, 0.0, 0.0, 1.0);
+//     }
+    
+//     // Check if we're near the Z axis (x = 0)
+//     if (abs(WorldPos.x) < thickness) {
+//         // Make z-axis blue, keep the same alpha
+//         Color =  vec4(0.0, 0.0, 1.0, 1.0);
+//     }
+//     //Color.a = 1.0;
+
+//     return Color;
+// }
+
 
 void main()
 {
@@ -120,15 +137,19 @@ void main()
     float LOD_fade = fract(LOD);
     vec4 Color;
 
+    
     if (Lod2a > 0.0) {
         Color = gGridColorThick;
+        //Color = CheckAxis(Color, WorldPos, Lod2a);
         Color.a *= Lod2a;
     } else {
         if (Lod1a > 0.0) {
             Color = mix(gGridColorThick, gGridColorThin, LOD_fade);
+            //Color = CheckAxis(Color, WorldPos, Lod1a);
 	        Color.a *= Lod1a;   
         } else {
             Color = gGridColorThin;
+            //Color = CheckAxis(Color, WorldPos, 0.025);
 	        Color.a *= (Lod0a * (1.0 - LOD_fade));
         }
     }
@@ -137,7 +158,6 @@ void main()
     
 
     Color.a *= OpacityFalloff;
-    //Color.a *= 0.7; // Reduce overall grid opacity
 
     float ShadowFactor = CalcShadowFactorBasic(gLightDirection);
 
@@ -146,10 +166,4 @@ void main()
     } else {
         FragColor = Color;
     }
-
-    // if (FragColor.a < 0.01) {
-    //     discard;
-    // }
-
-    //FragColor = vec4(ShadowFactor);
 }

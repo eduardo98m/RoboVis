@@ -14,9 +14,9 @@ namespace rbvs
 
         this->grid_shader = LoadShader(TextFormat(vs_path.c_str(), GLSL_VER), TextFormat(fs_path.c_str(), GLSL_VER));
 
-        // Mesh plane_mesh = GenMeshPlane(2.0f, 2.0f, 1, 1); // 2x2 size, 1x1 segments
-        // plane_model = LoadModelFromMesh(plane_mesh);
-        // plane_model.materials[0].shader = grid_shader;
+        Mesh plane_mesh = GenMeshPlane(2.0f, 2.0f, 1, 1); // 2x2 size, 1x1 segments
+        plane_model = LoadModelFromMesh(plane_mesh);
+        plane_model.materials[0].shader = grid_shader;
     }
 
     void ShaderManagerSystem::render_grid_shader(Camera3D camera)
@@ -37,19 +37,32 @@ namespace rbvs
         // SetShaderValueMatrix(grid_shader, GetShaderLocation(grid_shader, "projection"), projection);
 
         // Update shader uniforms
-        int vpLoc = GetShaderLocation(grid_shader, "gVP");
-        SetShaderValueMatrix(grid_shader, vpLoc, viewProj);
+        //int vpLoc = GetShaderLocation(grid_shader, "gVP");
+        SetShaderValueMatrix(grid_shader, GetShaderLocation(grid_shader, "gVP"), viewProj);
 
         // Update gCameraWorldPos with the camera's position.
         int camPosLoc = GetShaderLocation(this->grid_shader, "gCameraWorldPos");
         SetShaderValueV(this->grid_shader, camPosLoc, &camera.position, SHADER_UNIFORM_VEC3, 1);
+        Vector3 pos = {0.0, 0.0, 0.0};
+        Quaternion rot = QuaternionFromEuler(0.1, 1.57, 0.3);
 
         
-        // rlDisableDepthMask(); // Ensure depth writing is enabled
-        //rlSetBlendMode(RL_BLEND_ALPHA);
+        // Matrix translation = MatrixTranslate(pos.x, pos.y, pos.z);
+        // Matrix rotation = MatrixRotateXYZ((Vector3){ rot.x, rot.y, rot.z });
+        // Matrix scaling = MatrixScale(1.0, 1.0, 1.0);
+        // Matrix modelMatrix = MatrixMultiply(MatrixMultiply(scaling, rotation), translation);
+        // int modelLoc = GetShaderLocation(grid_shader, "model");
+        //SetShaderValueMatrix(grid_shader, GetShaderLocation(grid_shader, "gModel"), modelMatrix);
+
+        
+        rlDisableDepthMask(); 
+        rlDisableBackfaceCulling();
         BeginShaderMode(this->grid_shader);
-        DrawPlane({0.0, 0.0, 0.0}, {100, 100}, WHITE);
+        DrawRectangle(0, 0, 100, 100, WHITE);
         EndShaderMode();
+        rlEnableDepthMask();
+        rlEnableBackfaceCulling();
+
         //rlSetBlendMode(RL_BLEND_ALPHA);
 
 
