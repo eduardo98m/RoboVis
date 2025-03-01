@@ -6,6 +6,7 @@ namespace rbvs
     void RenderingSystem::init(void)
     {
         shader_manager_system.load_grid_shader();
+        point_cloud_renderer.load_shader();
     }
 
     void RenderingSystem::update(EntityManager &em, Camera3D camera)
@@ -17,6 +18,7 @@ namespace rbvs
 
         shader_manager_system.render_grid_shader(camera);
         visual_model_renderer.update(em);
+        point_cloud_renderer.update(em, camera);
 
         EndMode3D();
         rlImGuiBegin();

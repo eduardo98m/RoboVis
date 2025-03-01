@@ -23,6 +23,7 @@
 
 // Internal - API
 #include "API/Model.hpp"
+#include "API/PointCloud.hpp"
 
 namespace rbvs
 {
@@ -49,14 +50,18 @@ namespace rbvs
          * @brief Creates a model entity
          */
         Entity create_model(ModelParams params);
-
-
         /**
          * @brief Updates a model entity
          */
         void update_model(ModelUpdateParams params);
 
         void delete_model(Entity entity);
+
+        Entity create_point_cloud(PointCloudParams params);
+
+        void update_point_cloud(PointCloudUpdateParams params);
+
+        void delete_point_cloud(Entity entity);
 
         /**
          * @brief  

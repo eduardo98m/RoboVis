@@ -3,42 +3,42 @@
 #include "rlights.hpp"
 #include <memory>
 #include <optional>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 
+#include <stdio.h>
 
 int main() {
     // Initialize the visualizer
     rbvs::Visualizer visualizer = rbvs::Visualizer(1208, 720, "RoboVis");
-    
-    
-    // rbvs::Entity sphere_entity = visualizer.create_model(
-    //     rbvs::ModelParams{
-    //         .scale = {2.0, 0.1, 0.4},
-    //         .color = GREEN,
-    //         .model_type = rbvs::ModelType::SPHERE,
-    //         .radius = 2.0,
-            
-    //     }
-    // );
 
+    // Create a simple point cloud
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
-    // rbvs::Entity cube_entity = visualizer.create_model(
-    //     rbvs::ModelParams{
-    //         .position = {0.0, 0.0, 0.0},
-    //         .color = {255, 0 , 0,  50},
-    //         .model_type = rbvs::ModelType::BOX,
-    //         .half_extents = Vector3{1.0, 2.0, 3.0},
-    //     }
-    // );
+    float step = 0.5;
+    float lenght = 50 * step;
 
-    // rbvs::Entity cylinder_entity = visualizer.create_model(
-    //     rbvs::ModelParams{
-    //         .position = {0.0, 0.0, 0.0},
-    //         .color = {255, 0 , 255,  50},
-    //         .model_type = rbvs::ModelType::CYLINDER,
-    //         .radius = 1.0,
-    //         .length = 5.0,
-    //     }
-    // );
+    for (float x = -lenght; x <= lenght; x += step) {
+        for (float y = -lenght; y <= lenght; y += step) {
+            for (float z = -lenght; z <= lenght; z += step) {
+                cloud->points.push_back(pcl::PointXYZ(x, y, z));
+            }
+        }
+    }
+
+    float x;
+    std::cout << "This is the number of points for the rendering: " << cloud->points.size() << "\n";
+    std::cin >> x;
+
+    // Create a point cloud entity
+    rbvs::Entity point_cloud_entity = visualizer.create_point_cloud(
+        rbvs::PointCloudParams{
+            .position = {1.0, 1.0, 0.0},
+            .orientation = QuaternionIdentity(),
+            .color = RED,
+            .cloud = cloud
+        }
+    );
 
     rbvs::Entity cylinder_entity = visualizer.create_model(
             rbvs::ModelParams{
@@ -122,6 +122,11 @@ int main() {
         new_pos.y = floatHeight * sinf(GetTime());
         new_scale.x = 0.3 + sinf(GetTime());
         new_orientation = QuaternionFromEuler(0.0f, GetTime() * rotationSpeed, 0.0f);
+
+        visualizer.update_point_cloud(rbvs::PointCloudUpdateParams{
+            .entity = point_cloud_entity,
+            .position = std::optional<Vector3>{new_pos},
+        });
 
         // visualizer.update_model(rbvs::ModelUpdateParams{
         //     .entity = sphere_entity,
