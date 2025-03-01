@@ -47,6 +47,7 @@ namespace rbvs
         Quaternion orientation;
         Color color;
         bool visible = true;
+        float scale = 1.0;
         int ssboID = 0;
 
         //PointCloud() : cloud(new pcl::PointCloud<pcl::PointXYZ>) {}

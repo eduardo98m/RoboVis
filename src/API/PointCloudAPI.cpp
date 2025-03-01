@@ -9,7 +9,8 @@ namespace rbvs
             .position = params.position,
             .orientation = params.orientation,
             .color = params.color,
-            .visible = true
+            .visible = true,
+            .scale = params.scale
         };
 
         Entity e = this->entity_manager.create();
@@ -27,6 +28,7 @@ namespace rbvs
         if (params.orientation) pc.orientation = *params.orientation;
         if (params.color) pc.color = *params.color; 
         if (params.visible) pc.visible = *params.visible;      
+        if (params.scale) pc.scale = *params.scale;    
     }
 
     void Visualizer::delete_point_cloud(Entity entity)

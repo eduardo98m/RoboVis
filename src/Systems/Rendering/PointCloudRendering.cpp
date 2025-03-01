@@ -8,9 +8,6 @@ namespace rbvs
         std::string fs_path = std::string(SHADER_BASE_PATH) + "/pointcloud.fs";
 
         this->shader = LoadShader(TextFormat(vs_path.c_str(), GLSL_VER), TextFormat(fs_path.c_str(), GLSL_VER));
-
-        // Create a cube mesh for our points instead of a sphere
-        this->base_mesh = GenMeshCube(1.0f, 1.0f, 1.0f);
     }
 
     void PointCloudRenderingSystem::update(EntityManager &em, Camera3D camera)
@@ -32,21 +29,13 @@ namespace rbvs
             int particleVao = rlLoadVertexArray();
             rlEnableVertexArray(particleVao);
 
-            // --- Create or update the points SSBO ---
-            std::vector<Vector4> pointsVec4;
-            pointsVec4.reserve(pc.cloud->points.size());
-            for (const auto &pt : pc.cloud->points)
-            {
-                pointsVec4.push_back({pt.x, pt.y, pt.z, 1.0f});
-            }
-
             if (pc.ssboID == 0)
             {
-                pc.ssboID = rlLoadShaderBuffer(pointsVec4.size() * sizeof(Vector4), pointsVec4.data(), RL_DYNAMIC_COPY);
+                pc.ssboID = rlLoadShaderBuffer(pc.cloud->points.size() * sizeof(pcl::PointXYZ), pc.cloud->points.data(), RL_DYNAMIC_COPY);
             }
             else
             {
-                rlUpdateShaderBuffer(pc.ssboID, pointsVec4.data(), pointsVec4.size() * sizeof(Vector4), 0);
+                rlUpdateShaderBuffer(pc.ssboID, pc.cloud->points.data(), pc.cloud->points.size() * sizeof(pcl::PointXYZ), 0);
             }
 
             // --- Setup base geometry for instancing ---
@@ -89,7 +78,7 @@ namespace rbvs
             // Configure vertex attributes
             rlEnableVertexAttribute(0);
             rlSetVertexAttribute(0, 3, RL_FLOAT, false, 0, 0);
-
+            rlDisableBackfaceCulling();
             // --- Drawing ---
             rlEnableShader(shader.id);
 
@@ -103,7 +92,7 @@ namespace rbvs
             SetShaderValueMatrix(shader, GetShaderLocation(shader, "modelMatrix"), model);
 
             // Set particle scale
-            float particleScale = 0.1f;  // Adjust this value as needed
+            float particleScale = pc.scale;  // Adjust this value as needed
             SetShaderValue(shader, GetShaderLocation(shader, "particleScale"), &particleScale, SHADER_UNIFORM_FLOAT);
 
             // Bind the SSBO with point positions
@@ -115,6 +104,9 @@ namespace rbvs
             // Cleanup
             rlDisableVertexArray();
             rlDisableShader();
+            rlEnableBackfaceCulling();
+
+            // This doesnt seem necessary
             //rlUnloadVertexArray(particleVao);
             
             // We keep the SSBO for reuse

@@ -4,6 +4,7 @@
 #include <raylib.h>
 #include <rlgl.h>
 #include <raymath.h>
+#include <vector>
 #define GLSL_VER 440
 
 namespace rbvs
