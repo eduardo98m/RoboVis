@@ -11,6 +11,8 @@ uniform float particleScale;
 uniform bool billboarding = false;
 uniform int colorMode = 0;  // New uniform for color mode
 uniform vec4 pointColor;  // New uniform for point color
+uniform vec3 CameraRight_worldspace;
+uniform vec3 CameraUp_worldspace;
 
 
 
@@ -27,10 +29,6 @@ void main() {
     
     // Compute world-space position of the point
     vec4 worldPoint = modelMatrix * vec4(pointPosition, 1.0);
-
-    // Extract the camera's right and up vectors from the view matrix
-    vec3 CameraRight_worldspace = {viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]};
-    vec3 CameraUp_worldspace = {viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]};
 
     vec3 billVert = (vertexPosition.x * CameraRight_worldspace + 
                            vertexPosition.y * CameraUp_worldspace) * particleScale;

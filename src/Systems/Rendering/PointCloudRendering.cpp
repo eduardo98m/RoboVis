@@ -128,6 +128,13 @@ namespace rbvs
             SetShaderValueMatrix(shader, GetShaderLocation(shader, "viewMatrix"), view);
             SetShaderValueMatrix(shader, GetShaderLocation(shader, "modelMatrix"), model);
 
+
+            Vector3 view_right = Vector3{view.m0, view.m4, view.m8}; 
+            Vector3 view_up = Vector3{view.m1, view.m5, view.m9}; 
+
+            SetShaderValue(shader, GetShaderLocation(shader, "CameraRight_worldspace"), &view_right, SHADER_UNIFORM_VEC3);
+            SetShaderValue(shader, GetShaderLocation(shader, "CameraUp_worldspace"), &view_up, SHADER_UNIFORM_VEC3);
+
             // Set particle scale
             float particleScale = pc.scale;  // Adjust this value as needed
             SetShaderValue(shader, GetShaderLocation(shader, "particleScale"), &particleScale, SHADER_UNIFORM_FLOAT);
