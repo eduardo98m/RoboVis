@@ -40,20 +40,34 @@ namespace rbvs
 
             // --- Setup base geometry for instancing ---
             // We're creating a cube where each vertex is at a corner of a unit cube
-            Vector3 vertices[] = {
+            
+            // constexpr Vector3 vertices[] = {
+            //     // Front face
+            //     { -0.5f, -0.5f,  0.5f },
+            //     {  0.5f, -0.5f,  0.5f },
+            //     {  0.5f,  0.5f,  0.5f },
+            //     { -0.5f,  0.5f,  0.5f },
+            // };
+            
+            // constexpr unsigned short indices[] = {
+            //     // Front face
+            //     0, 1, 2, 2, 3, 0,
+            // };
+
+            Vector3 cube_vertices[] = {
                 // Front face
                 { -0.5f, -0.5f,  0.5f },
                 {  0.5f, -0.5f,  0.5f },
                 {  0.5f,  0.5f,  0.5f },
                 { -0.5f,  0.5f,  0.5f },
-                // Back face
+                // // Back face
                 { -0.5f, -0.5f, -0.5f },
                 {  0.5f, -0.5f, -0.5f },
                 {  0.5f,  0.5f, -0.5f },
                 { -0.5f,  0.5f, -0.5f }
             };
-
-            unsigned short indices[] = {
+        
+            unsigned short cube_indices[] = {
                 // Front face
                 0, 1, 2, 2, 3, 0,
                 // Right face
@@ -67,14 +81,37 @@ namespace rbvs
                 // Bottom face
                 4, 5, 1, 1, 0, 4
             };
+        
+            Vector3 square_vertices[] = {
+                // Front face
+                { -0.5f, -0.5f,  0.5f },
+                {  0.5f, -0.5f,  0.5f },
+                {  0.5f,  0.5f,  0.5f },
+                { -0.5f,  0.5f,  0.5f },
+            };
+        
+            unsigned short square_indices[] = {
+                // Front face
+                0, 1, 2, 2, 3, 0,
+            };
+        
 
-            // Calculate number of indices
-            int indexCount = sizeof(indices) / sizeof(indices[0]);
-
-            // Setup VBO for the cube vertices
-            int vbo = rlLoadVertexBuffer(vertices, sizeof(vertices), false);
-            int ibo = rlLoadVertexBufferElement(indices, sizeof(indices), false);
-
+            Vector3 *vertices;
+            unsigned short *indices;
+            int index_count;
+            if (pc.marker_type == PointCloud::MarkerType::Square){
+                // Setup VBO for the cube vertices
+                index_count = sizeof(square_indices) / sizeof(square_indices[0]);
+                int vbo = rlLoadVertexBuffer(square_vertices, sizeof(square_vertices), false);
+                int ibo = rlLoadVertexBufferElement(square_indices, sizeof(square_indices), false);           
+            }else{
+                // Setup VBO for the cube vertices
+                index_count = sizeof(cube_indices) / sizeof(cube_indices[0]);
+                int vbo = rlLoadVertexBuffer(cube_vertices, sizeof(cube_vertices), false);
+                int ibo = rlLoadVertexBufferElement(cube_indices, sizeof(cube_indices), false);
+                
+            }
+             
             // Configure vertex attributes
             rlEnableVertexAttribute(0);
             rlSetVertexAttribute(0, 3, RL_FLOAT, false, 0, 0);
@@ -95,11 +132,19 @@ namespace rbvs
             float particleScale = pc.scale;  // Adjust this value as needed
             SetShaderValue(shader, GetShaderLocation(shader, "particleScale"), &particleScale, SHADER_UNIFORM_FLOAT);
 
+            int billboarding = pc.marker_type == PointCloud::MarkerType::Square ? 1 : 0;
+            SetShaderValue(shader, GetShaderLocation(shader, "billboarding"), &billboarding, SHADER_UNIFORM_INT);
+
+            int colorMode = static_cast<int>(pc.coloring_mode);
+            SetShaderValue(shader, GetShaderLocation(shader, "colorMode"), &colorMode, SHADER_UNIFORM_INT);
+
+            Vector4 pointColor = { pc.color.r / 255.0f, pc.color.g / 255.0f, pc.color.b / 255.0f, pc.color.a / 255.0f };
+            SetShaderValue(shader, GetShaderLocation(shader, "pointColor"), &pointColor, SHADER_UNIFORM_VEC4);
             // Bind the SSBO with point positions
             rlBindShaderBuffer(pc.ssboID, 0);
 
             // Draw the cubes using instanced rendering with the explicitly calculated index count
-            rlDrawVertexArrayElementsInstanced(0, indexCount, 0, pc.cloud->points.size());
+            rlDrawVertexArrayElementsInstanced(0, index_count, 0, pc.cloud->points.size());
 
             // Cleanup
             rlDisableVertexArray();

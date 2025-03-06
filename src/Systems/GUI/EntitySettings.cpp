@@ -83,6 +83,22 @@ namespace rbvs
                     pc.color.a = static_cast<unsigned char>(color[3] * 255.0f);
                 }
 
+                // Combo box for marker type selection
+                const char* marker_labels[] = { "Cube", "Square" };
+                int marker_index = static_cast<int>(pc.marker_type);
+
+                if (ImGui::Combo("Marker", &marker_index, marker_labels, IM_ARRAYSIZE(marker_labels))) {
+                    pc.marker_type = static_cast<PointCloud::MarkerType>(marker_index);
+                }
+
+                // Combo box for coloring mode selection
+                const char* coloring_labels[] = { "Solid Color", "Color by X Axis", "Color by Y Axis", "Color by Z Axis" };
+                int coloring_index = static_cast<int>(pc.coloring_mode);
+
+                if (ImGui::Combo("Coloring Mode", &coloring_index, coloring_labels, IM_ARRAYSIZE(coloring_labels))) {
+                    pc.coloring_mode = static_cast<PointCloud::ColoringMode>(coloring_index);
+                }
+
             }
 
             ImGui::PopID();

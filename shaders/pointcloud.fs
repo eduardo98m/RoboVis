@@ -11,5 +11,5 @@ void main() {
     //float diffuse = max(dot(fragNormal, lightDir), 0.2);
     
     // Final color combines the point color with lighting
-    finalColor = vec4(fragColor.rgb, fragColor.a);
+    finalColor = fragColor;  // Combine point color with the calculated color
 }

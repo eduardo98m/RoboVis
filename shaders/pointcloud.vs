@@ -8,6 +8,11 @@ uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 modelMatrix;
 uniform float particleScale;
+uniform bool billboarding = false;
+uniform int colorMode = 0;  // New uniform for color mode
+uniform vec4 pointColor;  // New uniform for point color
+
+
 
 // SSBO containing point positions
 layout(std430, binding=0) buffer ssbo0 { vec3 positions[]; };
@@ -24,12 +29,19 @@ void main() {
     vec4 worldPoint = modelMatrix * vec4(pointPosition, 1.0);
 
     // Extract the camera's right and up vectors from the view matrix
-    vec3 cameraRight = normalize(vec3(viewMatrix[0].xyz)); // Right direction
-    vec3 cameraUp = normalize(vec3(viewMatrix[1].xyz));    // Up direction
+    vec3 CameraRight_worldspace = {viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]};
+    vec3 CameraUp_worldspace = {viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]};
 
+    vec3 billVert = (vertexPosition.x * CameraRight_worldspace + 
+                           vertexPosition.y * CameraUp_worldspace) * particleScale;
+
+    vec3 regVert = vertexPosition * particleScale;
+
+    vec3 vert  = billboarding ? billVert : regVert;
+    
     // Compute billboard vertex position
-    vec3 billboardVertex = worldPoint.xyz + vertexPosition * particleScale;
-                          //+ (vertexPosition.x * cameraRight + vertexPosition.y * cameraUp) * particleScale;
+    vec3 billboardVertex = worldPoint.xyz + vert; 
+                          //billVert * ;
 
     // Final position in clip space
     gl_Position = projectionMatrix * viewMatrix * vec4(billboardVertex, 1.0);
@@ -39,5 +51,17 @@ void main() {
 
     // Color based on world position
     vec3 normalizedPos = normalize(pointPosition) * 0.5 + 0.5;
-    fragColor = vec4(normalizedPos, 1.0);
+    
+    if (colorMode == 1) {
+        fragColor = vec4(normalizedPos.x, normalizedPos.y, normalizedPos.z, 1.0);  // Color by Axis X
+    } else if (colorMode == 2) {
+        fragColor = vec4(normalizedPos.y, normalizedPos.z, normalizedPos.x, 1.0);  // Color by Axis Y
+    } else if (colorMode == 3) {
+        fragColor = vec4(normalizedPos.z, normalizedPos.x, normalizedPos.y, 1.0);  // Color by Axis Z
+    } else {
+        fragColor = pointColor;//vec4(normalizedPos, 1.0);  // Default color
+    }
+
+    //fragColor = vec4(normalizedPos, 1.0);  // Default color
+
 }

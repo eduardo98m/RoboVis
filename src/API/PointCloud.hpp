@@ -17,7 +17,7 @@ namespace rbvs
 {
 
     /**
-     * @brief Struct holding parameters for creating a 3D model.
+     * @brief Struct holding parameters for creating a 3D pointcloud
      */
     struct PointCloudParams
     {
@@ -26,6 +26,8 @@ namespace rbvs
         Color color = {255, 255, 255, 255};            ///< Color (RGBA format).
         float scale = 1.0;
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
+        PointCloud::MarkerType marker_type = PointCloud::MarkerType::Cube;
+        PointCloud::ColoringMode coloring_mode = PointCloud::ColoringMode::SolidColor;
     
     };
 
@@ -35,12 +37,14 @@ namespace rbvs
      */
     struct PointCloudUpdateParams
     {
-        Entity entity; // The entity to which we will be updating the params
-        std::optional<Vector3> position{};       ///< Optional new position.
-        std::optional<Quaternion> orientation{}; ///< Optional new orientation.
-        std::optional<Color> color{};          ///< Color (RGBA format).
+        Entity entity;
+        std::optional<Vector3> position{};
+        std::optional<Quaternion> orientation{};
+        std::optional<Color> color{};
         std::optional<bool> visible{};
-        std::optional<float> scale{};        
+        std::optional<float> scale{};
+        std::optional<PointCloud::MarkerType> marker_type{};
+        std::optional<PointCloud::ColoringMode> coloring_mode{};  // New option
     };
 
 } // namespace rbvs

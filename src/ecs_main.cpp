@@ -15,8 +15,8 @@ int main() {
     // Create a simple point cloud
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
-    float step = 0.5;
-    float lenght = 20 * step;
+    float step = 1.0;
+    float lenght = 50 * step;
 
     for (float x = -lenght; x <= lenght; x += step) {
         for (float y = -lenght; y <= lenght; y += step) {
@@ -26,6 +26,9 @@ int main() {
         }
     }
 
+    // 8 120 601 : 100
+    //13 997 521 : 120
+
     float x;
     std::cout << "This is the number of points for the rendering: " << cloud->points.size() << "\n";
     //std::cin >> x;
@@ -33,11 +36,12 @@ int main() {
     // Create a point cloud entity
     rbvs::Entity point_cloud_entity = visualizer.create_point_cloud(
         rbvs::PointCloudParams{
-            .position = {1.0, 1.0, 0.0},
+            .position = {0.0, 0.0, 0.0},
             .orientation = QuaternionIdentity(),
             .color = RED,
             .scale = 0.05,
             .cloud = cloud,
+            .marker_type = rbvs::PointCloud::Cube
         }
     );
 
