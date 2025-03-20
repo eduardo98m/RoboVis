@@ -15,7 +15,7 @@ int main() {
     // Create a simple point cloud
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
-    float step = 1.0;
+    float step = 0.5;
     float lenght = 50 * step;
 
     for (float x = -lenght; x <= lenght; x += step) {
@@ -41,7 +41,7 @@ int main() {
             .color = RED,
             .scale = 0.05,
             .cloud = cloud,
-            .marker_type = rbvs::PointCloud::Cube
+            .marker_type = rbvs::PointCloud::Square
         }
     );
 

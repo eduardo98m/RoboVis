@@ -16,21 +16,36 @@ namespace rbvs
 
         for (auto entity : view)
         {
+            // Get the pointcloud entuty from the entity manager
             auto &pc = em.getComponent<PointCloud>(entity);
+
+            // Check if it is visible and if it has points
             if (!pc.visible || pc.cloud->points.empty())
                 continue;
 
-            // --- Compute Model Matrix ---
+            // --- Compute the matrices:
+
+            //
             Matrix translation = MatrixTranslate(pc.position.x, pc.position.y, pc.position.z);
             Matrix rotation = QuaternionToMatrix(pc.orientation);
+            // Model matrix : I.e. Homogeneous transform of the coordinates of the pointcloud
             Matrix model = MatrixMultiply(rotation, translation);
+            
+            // Calculate the camera matrices
+            Matrix projection = rlGetMatrixProjection();
+            Matrix view = GetCameraMatrix(camera);
 
-            // --- Prepare the VAO for instanced rendering ---
+            // Also pass thesese vectors to the shader 
+            // (is better to calculate them once in cpu rather that doing it many times on gpu)
+            Vector3 view_right = Vector3{view.m0, view.m4, view.m8}; 
+            Vector3 view_up = Vector3{view.m1, view.m5, view.m9}; 
+
+            // --- Prepare the VAO [Vertex array object] for instanced rendering ---
             int particleVao = rlLoadVertexArray();
             rlEnableVertexArray(particleVao);
-
             if (pc.ssboID == 0)
-            {
+            {   
+                // Here we set the Shader Storage Buffer Object ID (is an integer ID that represents the SSBO within OpenGL.)
                 pc.ssboID = rlLoadShaderBuffer(pc.cloud->points.size() * sizeof(pcl::PointXYZ), pc.cloud->points.data(), RL_DYNAMIC_COPY);
             }
             else
@@ -38,66 +53,7 @@ namespace rbvs
                 rlUpdateShaderBuffer(pc.ssboID, pc.cloud->points.data(), pc.cloud->points.size() * sizeof(pcl::PointXYZ), 0);
             }
 
-            // --- Setup base geometry for instancing ---
-            // We're creating a cube where each vertex is at a corner of a unit cube
-            
-            // constexpr Vector3 vertices[] = {
-            //     // Front face
-            //     { -0.5f, -0.5f,  0.5f },
-            //     {  0.5f, -0.5f,  0.5f },
-            //     {  0.5f,  0.5f,  0.5f },
-            //     { -0.5f,  0.5f,  0.5f },
-            // };
-            
-            // constexpr unsigned short indices[] = {
-            //     // Front face
-            //     0, 1, 2, 2, 3, 0,
-            // };
-
-            Vector3 cube_vertices[] = {
-                // Front face
-                { -0.5f, -0.5f,  0.5f },
-                {  0.5f, -0.5f,  0.5f },
-                {  0.5f,  0.5f,  0.5f },
-                { -0.5f,  0.5f,  0.5f },
-                // // Back face
-                { -0.5f, -0.5f, -0.5f },
-                {  0.5f, -0.5f, -0.5f },
-                {  0.5f,  0.5f, -0.5f },
-                { -0.5f,  0.5f, -0.5f }
-            };
-        
-            unsigned short cube_indices[] = {
-                // Front face
-                0, 1, 2, 2, 3, 0,
-                // Right face
-                1, 5, 6, 6, 2, 1,
-                // Back face
-                5, 4, 7, 7, 6, 5,
-                // Left face
-                4, 0, 3, 3, 7, 4,
-                // Top face
-                3, 2, 6, 6, 7, 3,
-                // Bottom face
-                4, 5, 1, 1, 0, 4
-            };
-        
-            Vector3 square_vertices[] = {
-                // Front face
-                { -0.5f, -0.5f,  0.5f },
-                {  0.5f, -0.5f,  0.5f },
-                {  0.5f,  0.5f,  0.5f },
-                { -0.5f,  0.5f,  0.5f },
-            };
-        
-            unsigned short square_indices[] = {
-                // Front face
-                0, 1, 2, 2, 3, 0,
-            };
-        
-
-            Vector3 *vertices;
-            unsigned short *indices;
+            // Get the correct shape type markers
             int index_count;
             if (pc.marker_type == PointCloud::MarkerType::Square){
                 // Setup VBO for the cube vertices
@@ -116,35 +72,26 @@ namespace rbvs
             rlEnableVertexAttribute(0);
             rlSetVertexAttribute(0, 3, RL_FLOAT, false, 0, 0);
             rlDisableBackfaceCulling();
-            // --- Drawing ---
-            rlEnableShader(shader.id);
 
-            // Set matrices
-            Matrix projection = rlGetMatrixProjection();
-            Matrix view = GetCameraMatrix(camera);
+            // Start Drawing ---
+            rlEnableShader(shader.id);
 
             // Set shader uniforms
             SetShaderValueMatrix(shader, GetShaderLocation(shader, "projectionMatrix"), projection);
             SetShaderValueMatrix(shader, GetShaderLocation(shader, "viewMatrix"), view);
             SetShaderValueMatrix(shader, GetShaderLocation(shader, "modelMatrix"), model);
-
-
-            Vector3 view_right = Vector3{view.m0, view.m4, view.m8}; 
-            Vector3 view_up = Vector3{view.m1, view.m5, view.m9}; 
-
             SetShaderValue(shader, GetShaderLocation(shader, "CameraRight_worldspace"), &view_right, SHADER_UNIFORM_VEC3);
             SetShaderValue(shader, GetShaderLocation(shader, "CameraUp_worldspace"), &view_up, SHADER_UNIFORM_VEC3);
-
-            // Set particle scale
-            float particleScale = pc.scale;  // Adjust this value as needed
-            SetShaderValue(shader, GetShaderLocation(shader, "particleScale"), &particleScale, SHADER_UNIFORM_FLOAT);
-
+            SetShaderValue(shader, GetShaderLocation(shader, "cameraPosition"), &camera.position, SHADER_UNIFORM_VEC3);
+            SetShaderValue(shader, GetShaderLocation(shader, "particleScale"), &pc.scale, SHADER_UNIFORM_FLOAT);
+            SetShaderValue(shader, GetShaderLocation(shader, "maxDrawDistance"), &this->draw_distance, SHADER_UNIFORM_FLOAT);
+            // Apply bilboarding flag if renreing square markers 
             int billboarding = pc.marker_type == PointCloud::MarkerType::Square ? 1 : 0;
             SetShaderValue(shader, GetShaderLocation(shader, "billboarding"), &billboarding, SHADER_UNIFORM_INT);
-
+            // Set the color mode (cast ot int)
             int colorMode = static_cast<int>(pc.coloring_mode);
             SetShaderValue(shader, GetShaderLocation(shader, "colorMode"), &colorMode, SHADER_UNIFORM_INT);
-
+            // Pass the color
             Vector4 pointColor = { pc.color.r / 255.0f, pc.color.g / 255.0f, pc.color.b / 255.0f, pc.color.a / 255.0f };
             SetShaderValue(shader, GetShaderLocation(shader, "pointColor"), &pointColor, SHADER_UNIFORM_VEC4);
             // Bind the SSBO with point positions
@@ -157,11 +104,6 @@ namespace rbvs
             rlDisableVertexArray();
             rlDisableShader();
             rlEnableBackfaceCulling();
-
-            // This doesnt seem necessary
-            //rlUnloadVertexArray(particleVao);
-            
-            // We keep the SSBO for reuse
         }
     }
 }
