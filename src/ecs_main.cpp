@@ -16,7 +16,7 @@ int main() {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
     float step = 0.5;
-    float lenght = 50 * step;
+    float lenght = 12 * step;
 
     for (float x = -lenght; x <= lenght; x += step) {
         for (float y = -lenght; y <= lenght; y += step) {
@@ -36,7 +36,7 @@ int main() {
     // Create a point cloud entity
     rbvs::Entity point_cloud_entity = visualizer.create_point_cloud(
         rbvs::PointCloudParams{
-            .position = {0.0, 0.0, 0.0},
+            .position = {10.0, 10.0, 0.0},
             .orientation = QuaternionIdentity(),
             .color = RED,
             .scale = 0.05,
@@ -106,6 +106,14 @@ int main() {
             .length = 3.0,
         }
     );
+
+
+    rbvs::Entity gizmo = visualizer.create_gizmo(
+        rbvs::GizmoParams{
+            .position = {0.0, 0.0, -2.0},
+        }
+    );
+
 
     
     // Define the sphere

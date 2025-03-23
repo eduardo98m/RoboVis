@@ -48,12 +48,18 @@ namespace rbvs
         Color color;
 
         enum MarkerType {Cube, Square} marker_type = Cube;  // New option for coloring mode
-        enum ColoringMode { SolidColor, ColorByAxisX, ColorByAxisY, ColorByAxisZ } coloring_mode = SolidColor;  // New option for coloring mode
+        enum ColoringMode { SolidColor, ColorByAxisX, ColorByAxisY, ColorByAxisZ } coloring_mode = ColoringMode::SolidColor;  // New option for coloring mode
         
         bool visible = true;
         float scale = 1.0;
         int ssboID = 0;
         
+    };
+    
+    struct Gizmo
+    {
+        Transform transform;
+        bool visible = true;
     };
         
 }

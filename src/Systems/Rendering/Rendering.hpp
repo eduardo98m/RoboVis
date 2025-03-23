@@ -5,6 +5,7 @@
 #include "Systems/Rendering/PointCloudRendering.hpp"
 #include "Systems/Rendering/ShaderManager.hpp"
 #include "Systems/GUI/EntitySettings.hpp"
+#include "Systems/Rendering/GizmoRendering.hpp"
 
 #include "rlImGui.h"
 #include <raymath.h>
@@ -28,6 +29,7 @@ namespace rbvs {
         VisualModelRenderingSystem visual_model_renderer;
         PointCloudRenderingSystem point_cloud_renderer;
         EntitySettingsSystem entity_setting_system;
+        GizmoRenderingSystem gizmo_renderer;
 
         ShaderManagerSystem shader_manager_system = ShaderManagerSystem();
     };

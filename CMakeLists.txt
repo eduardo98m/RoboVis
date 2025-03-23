@@ -20,7 +20,11 @@ include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-include_directories("src" "thirdParty/rlImGui" "thirdParty/imgui" "thirdParty/rlights")
+include_directories("src" 
+                    "thirdParty/rlImGui" 
+                    "thirdParty/imgui" 
+                    "thirdParty/rlights"
+                    "thirdParty/raylib-gizmo/src")
 
 SET(RLIGHTS_SOURCES
     thirdParty/rlights/rlights.cpp)
@@ -42,6 +46,7 @@ set(SYSTEMS_SOURCES
     "src/Systems/UserCameraInput.cpp"
     "src/Systems/Rendering/Rendering.cpp"
     "src/Systems/Rendering/VisualModelRendering.cpp"
+    "src/Systems/Rendering/GizmoRendering.cpp"
     "src/Systems/Rendering/PointCloudRendering.cpp"
     "src/Systems/GUI/EntitySettings.cpp"
     "src/Systems/Rendering/ShaderManager.cpp"
@@ -56,6 +61,7 @@ set(ECS_SOURCES
 
 set(API_SOURCES
     "src/API/ModelAPI.cpp"
+    "src/API/GizmoAPI.cpp"
     "src/API/PointCloudAPI.cpp"
 )
 
@@ -67,6 +73,9 @@ set(SOURCES
     src/Visualizer_visual_objects.cpp
     "src/VisualizerNew.cpp"
 )
+
+set(RAYLIB_GIZMO_SOURCES
+    "thirdParty/raylib-gizmo/src/raygizmo.c")
 
 
 set(EXAMPLE_SOURCES
@@ -94,7 +103,8 @@ add_executable(SpringMassSimulation
                 ${SOURCES} 
                 ${IMGUI_SOURCES} 
                 ${RAYMGUI_SOURCES} 
-                ${RLIGHTS_SOURCES})
+                ${RLIGHTS_SOURCES}
+                ${RAYLIB_GIZMO_SOURCES})
 
 set_target_properties(SpringMassSimulation PROPERTIES
     BUILD_RPATH_USE_ORIGIN TRUE

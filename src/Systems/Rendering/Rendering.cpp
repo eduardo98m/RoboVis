@@ -19,11 +19,16 @@ namespace rbvs
         shader_manager_system.render_grid_shader(camera);
         visual_model_renderer.update(em);
         point_cloud_renderer.update(em, camera);
+        gizmo_renderer.update(em);
 
         EndMode3D();
         rlImGuiBegin();
         // processUI(em);
         entity_setting_system.render_gui(em);
+
+        // Setings for the gizmos
+        gizmo_renderer.render_settings_gui();
+
         rlImGuiEnd();
         EndDrawing();
     }

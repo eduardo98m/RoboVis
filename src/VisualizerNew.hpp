@@ -24,6 +24,7 @@
 // Internal - API
 #include "API/Model.hpp"
 #include "API/PointCloud.hpp"
+#include "API/Gizmo.hpp"
 
 namespace rbvs
 {
@@ -62,6 +63,12 @@ namespace rbvs
         void update_point_cloud(PointCloudUpdateParams params);
 
         void delete_point_cloud(Entity entity);
+
+        Entity create_gizmo(GizmoParams params);
+
+        void update_gizmo(GizmoUpdateParams params);
+
+        //void delete_entity(Entity entity);
 
         /**
          * @brief  
