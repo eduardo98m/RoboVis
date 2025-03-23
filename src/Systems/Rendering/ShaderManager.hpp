@@ -1,8 +1,13 @@
+/**
+ * @author Eduardo I. Lopez H. (eduardo98m@gmail.com)
+ * @brief Grid shader
+ */
 #pragma once
+// Raylib
 #include <raylib.h>
 #include <raymath.h>
 #include <rlgl.h>
-
+// Standar Library
 #include <string>
 
 #define GLSL_VER 440

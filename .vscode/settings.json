@@ -78,7 +78,8 @@
         "__tree": "cpp",
         "queue": "cpp",
         "stack": "cpp",
-        "*.txx": "cpp"
+        "*.txx": "cpp",
+        "filesystem": "cpp"
     },
     "C_Cpp.errorSquiggles": "enabled"
 }
