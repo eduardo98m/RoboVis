@@ -16,15 +16,6 @@ namespace rbvs {
  */
 class UserCameraInputSystem {
 public:
-    // /**
-    //  * @brief Updates the camera from the user .
-    //  *
-    //  * This method iterates over all entities and updates the cameras (usually the only one) controlled by the user
-    //  * 
-    //  * @param entities A vector of camera-entities to be updated.
-    //  */
-    // void update(const std::vector<std::shared_ptr<Entity>> &entities);
-
     /**
      * @brief Updates the camera based on the user input
      *

@@ -3,21 +3,6 @@
 namespace rbvs
 {
 
-    // void UserCameraInputSystem::update(const std::vector<std::shared_ptr<Entity>> &entities)
-    // {
-    //     for (auto &entity : entities)
-    //     {
-    //         auto camera_comp = entity->getComponent<CameraComponent>();
-    //         auto camera_input_comp = entity->getComponent<CameraInputComponent>();
-
-    //         if (!camera_comp || !camera_input_comp)
-    //         {
-    //             continue; // Skip to the next entity if any component is missing
-    //         }
-    //         update_camera(camera_comp->camera, camera_input_comp->speed, camera_input_comp->sensitivity);
-    //     }
-    // }
-
     void UserCameraInputSystem::update_camera(Camera3D &camera, float speed, float sensitivity)
     {
         Vector3 cameraFront = Vector3Subtract(camera.target, camera.position);
