@@ -3,6 +3,7 @@
 #include "rlights.hpp"
 #include <memory>
 #include <optional>
+#include <vector>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
@@ -44,6 +45,38 @@ int main() {
             .marker_type = rbvs::PointCloud::Square
         }
     );
+
+
+    size_t n_x = 50;
+    size_t n_y = 100;
+    
+    std::vector<float> heights( n_x * n_y, 0.0f);
+
+    for (int i = 0; i<=n_x; i++){
+        for (int j = 0; j<=n_y; j++){
+            float x = (i > j) ? (0.1) : (0.2);
+            heights[i * n_x + j] = x;
+        }        
+    }
+
+    std::vector<Color> colors;
+
+    rbvs::Entity height_map = visualizer.create_height_map(
+        rbvs::HeightMapParams{
+            .position = {0.0, 0.0, 0.0},
+            .orientation = {0.0, 0.0, 0.0, 1.0},
+            .scale = {10.0, 5.0, 10.0},
+            .heights = heights,
+            .n_x = n_x,
+            .n_y = n_y,
+            .color = GREEN,
+            .color_map = colors
+        }
+    );
+
+    
+
+    // for ();
 
     rbvs::Entity cylinder_entity = visualizer.create_model(
             rbvs::ModelParams{

@@ -24,6 +24,7 @@
 // Internal - API
 #include "API/Model.hpp"
 #include "API/PointCloud.hpp"
+#include "API/HeightMap.hpp"
 #include "API/Gizmo.hpp"
 
 namespace rbvs
@@ -67,6 +68,10 @@ namespace rbvs
         Entity create_gizmo(GizmoParams params);
 
         void update_gizmo(GizmoUpdateParams params);
+
+        Entity create_height_map(HeightMapParams params);
+
+        void update_height_map(HeightMapUpdateParams params);
 
         //void delete_entity(Entity entity);
 

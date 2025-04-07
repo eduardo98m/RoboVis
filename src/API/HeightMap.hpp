@@ -15,60 +15,37 @@
 
 namespace rbvs
 {
-
+    
     /**
-     * @brief Enum representing different types of models that can be created.
+     * @brief Struct holding parameters for creating a heightmap.
      */
-    enum class ModelType
-    {
-        SPHERE,   ///< Sphere model.
-        BOX,      ///< Axis-aligned bounding box.
-        MESH,     ///< Custom mesh model loaded from a file.
-        CYLINDER, ///< Cylinder model.
-        CONE      ///< Cone model.
-    };
-
-    /**
-     * @brief
-     */
-    struct PreLoadedMeshes{
-        Mesh box_mesh;// GenMeshCube(1.0,  1.0, 1.0);
-        Mesh sphere_mesh;// GenMeshSphere(1.0,  32, 32);
-        Mesh cylinder_mesh;// GenMeshCylinder(1.0,  1.0, 32);
-        Mesh cone_mesh;// GenMeshCone(1.0,  1.0, 32);
-    };
-
-    /**
-     * @brief Struct holding parameters for creating a 3D model.
-     */
-    struct ModelParams
+    struct HeightMapParams
     {
         Vector3 position = {0.0f, 0.0f, 0.0f};         ///< Model position in world space.
         Quaternion orientation = {0.0, 0.0, 0.0, 1.0}; ///< Model orientation as a quaternion.
         Vector3 scale = {1.0f, 1.0f, 1.0f};            ///< Scaling factors for the model.
+        std::vector<float> &heights;
+        size_t n_x = 10;
+        size_t n_y = 10;
         Color color = {255, 255, 255, 255};            ///< Color (RGBA format).
-
-        ModelType model_type = ModelType::SPHERE;
-
-        // Shape-specific parameters
-        float radius = 1.0f;                       ///< Sphere radius or cylinder/cone base radius.
-        float length = 1.0f;                       ///< Cylinder length or cone height.
-        Vector3 half_extents = {1.0f, 1.0f, 1.0f}; ///< Half-widths for box models.
-
-        std::string model_path = ""; ///< File path for custom mesh models (used for ModelType::MESH).
+        std::vector<Color> &color_map; 
     };
 
     /**
      * @brief Struct for updating model properties dynamically.
      *        Uses std::optional to allow partial updates without allocating heap memory.
      */
-    struct ModelUpdateParams
+    struct HeightMapUpdateParams
     {
         Entity entity; // The entity to which we will be updating the params
         std::optional<Vector3> position{};       ///< Optional new position.
         std::optional<Quaternion> orientation{}; ///< Optional new orientation.
         std::optional<Vector3> scale{};          ///< Optional new scale.
+        std::optional<std::unique_ptr<std::vector<float>>> heights{};
+        std::optional<size_t> n_x{};
+        std::optional<size_t> n_y{};
         std::optional<Color> color{};          ///< Color (RGBA format).
+        std::optional<std::unique_ptr<std::vector<Color>>> color_map{};
         std::optional<bool> visible{};
     };
 

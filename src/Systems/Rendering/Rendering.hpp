@@ -3,6 +3,7 @@
 #include "Components/Base.hpp"
 #include "Systems/Rendering/VisualModelRendering.hpp"
 #include "Systems/Rendering/PointCloudRendering.hpp"
+#include "Systems/Rendering/HeightMapRendering.hpp"
 #include "Systems/Rendering/ShaderManager.hpp"
 #include "Systems/GUI/EntitySettings.hpp"
 #include "Systems/Rendering/GizmoRendering.hpp"
@@ -28,6 +29,7 @@ namespace rbvs {
     private:
         VisualModelRenderingSystem visual_model_renderer;
         PointCloudRenderingSystem point_cloud_renderer;
+        HeightMapRenderingSystem height_map_rendering;
         EntitySettingsSystem entity_setting_system;
         GizmoRenderingSystem gizmo_renderer;
 

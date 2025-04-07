@@ -48,6 +48,7 @@ set(SYSTEMS_SOURCES
     "src/Systems/Rendering/VisualModelRendering.cpp"
     "src/Systems/Rendering/GizmoRendering.cpp"
     "src/Systems/Rendering/PointCloudRendering.cpp"
+    "src/Systems/Rendering/HeightMapRendering.cpp"
     "src/Systems/GUI/EntitySettings.cpp"
     "src/Systems/Rendering/ShaderManager.cpp"
 )
@@ -63,6 +64,7 @@ set(API_SOURCES
     "src/API/ModelAPI.cpp"
     "src/API/GizmoAPI.cpp"
     "src/API/PointCloudAPI.cpp"
+    "src/API/HeightMapAPI.cpp"
 )
 
 
