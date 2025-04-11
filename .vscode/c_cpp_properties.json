@@ -5,6 +5,11 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/src/Systems",
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/thirdParty/rlImGui", 
+                "${workspaceFolder}/thirdParty/imgui" ,
+                "${workspaceFolder}/thirdParty/rlights",
+                "${workspaceFolder}/thirdParty/raylib-gizmo/src",
                 "/usr/include/pcl-1.12",
                 "/usr/include/eigen3"
             ],

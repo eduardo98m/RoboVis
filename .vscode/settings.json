@@ -80,7 +80,8 @@
         "stack": "cpp",
         "*.txx": "cpp",
         "filesystem": "cpp",
-        "charconv": "cpp"
+        "charconv": "cpp",
+        "regex": "c"
     },
     "C_Cpp.errorSquiggles": "enabled"
 }
