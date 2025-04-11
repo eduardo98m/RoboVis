@@ -69,9 +69,9 @@ namespace rbvs
 
         void update_gizmo(GizmoUpdateParams params);
 
-        Entity create_height_map(HeightMapParams params);
+        Entity create_height_map(const HeightMapParams &params);
 
-        void update_height_map(HeightMapUpdateParams params);
+        void update_height_map(const HeightMapUpdateParams &params);
 
         //void delete_entity(Entity entity);
 

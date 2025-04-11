@@ -41,7 +41,7 @@ namespace rbvs
         std::optional<Vector3> position{};       ///< Optional new position.
         std::optional<Quaternion> orientation{}; ///< Optional new orientation.
         std::optional<Vector3> scale{};          ///< Optional new scale.
-        std::optional<std::unique_ptr<std::vector<float>>> heights{};
+        std::optional<std::vector<float>> heights{};
         std::optional<size_t> n_x{};
         std::optional<size_t> n_y{};
         std::optional<Color> color{};          ///< Color (RGBA format).
