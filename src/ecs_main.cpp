@@ -18,7 +18,7 @@ int main()
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
     float step = 0.5;
-    float lenght = 12 * step;
+    float lenght = 25 * step;
 
     for (float x = -lenght; x <= lenght; x += step)
     {
@@ -39,52 +39,59 @@ int main()
     // std::cin >> x;
 
     // Create a point cloud entity
-    rbvs::Entity point_cloud_entity = visualizer.create_point_cloud(
-        rbvs::PointCloudParams{
-            .position = {10.0, 10.0, 0.0},
-            .orientation = QuaternionIdentity(),
-            .color = RED,
-            .scale = 0.05,
-            .cloud = cloud,
-            .marker_type = rbvs::PointCloud::Square});
+    // rbvs::Entity point_cloud_entity = visualizer.create_point_cloud(
+    //     rbvs::PointCloudParams{
+    //         .position = {10.0, 10.0, 0.0},
+    //         .orientation = QuaternionIdentity(),
+    //         .color = RED,
+    //         .scale = 0.05,
+    //         .cloud = cloud,
+    //         .marker_type = rbvs::PointCloud::Square});
 
-    size_t n_x = 25;
-    size_t n_y = 30;
-
+    size_t n_x = 200;
+    size_t n_y = 200;
     std::vector<float> heights(n_x * n_y, 0.0f);
+    std::vector<Color> color_map(n_x * n_y, WHITE);
 
-    for (int i = 0; i <= n_x; i++)
+
+    for (int i = 0; i < n_x; i++)
     {
         for (int j = 0; j <= n_y; j++)
         {
             float x = (i > j) ? (0.1) : (0.2);
+            Color c = (i % 2) ? (Color){.r = 0, .g = 255, .b = 58, .a = 75} : (Color){.r = 255, .g = 0, .b = 58, .a = 75};
             heights[i * n_x + j] = x;
+            color_map[i * n_x + j] = c;
         }
     }
 
     std::vector<float> heights_b(n_x * n_y, 0.0f);
 
-    for (int i = 0; i <= n_x; i++)
+    std::vector<Color> color_map_b(n_x * n_y, WHITE);
+
+    for (int i = 0; i < n_x; i++)
     {
         for (int j = 0; j <= n_y; j++)
         {
             float x = (i > j) ? (0.2) : (0.1);
+            Color c = (i % 2) ? (Color){.r = 125, .g = 30, .b = 58, .a = 75} : (Color){.r = 0, .g = 120, .b = 58, .a = 75};
             heights_b[i * n_x + j] = x;
+            color_map_b[i * n_x + j] = c;
         }
     }
 
-    std::vector<Color> colors;
+
 
     rbvs::Entity height_map = visualizer.create_height_map(
         rbvs::HeightMapParams{
             .position = {0.0, 5.0, 0.0},
             .orientation = QuaternionFromEuler(0.0, 2.0, 0.0),
-            .scale = {25.0, 1.0, 25.0},
+            .scale = {100.0, 1.0, 100.0},
             .heights = heights,
             .n_x = n_x,
             .n_y = n_y,
             .color = {.r = 0, .g = 255, .b = 58, .a = 75},
-            .color_map = colors});
+            .color_map = color_map});
 
     // for ();
 
@@ -169,25 +176,35 @@ int main()
         new_scale.x = 0.3 + sinf(GetTime());
         new_orientation = QuaternionFromEuler(0.0f, GetTime() * rotationSpeed, 0.0f);
 
-        visualizer.update_point_cloud(rbvs::PointCloudUpdateParams{
-            .entity = point_cloud_entity,
-            .position = std::optional<Vector3>{new_pos},
-        });
+        // visualizer.update_point_cloud(rbvs::PointCloudUpdateParams{
+        //     .entity = point_cloud_entity,
+        //     .position = std::optional<Vector3>{new_pos},
+        // });
 
-        if ((GetTime() - t_o) > 0.2)
+        if ((GetTime() - t_o) > 0.01)
         {
             latch = !latch;
             auto &chosen = latch ? heights : heights_b;
+            auto &chosen_c_map = latch ? color_map : color_map_b;
             Color c =  latch ? (Color){.r = 0, .g = 255, .b = 58, .a = 75} : (Color){.r = 255, .g = 0, .b = 58, .a = 75};
             visualizer.update_height_map(
                 rbvs::HeightMapUpdateParams{
                     .entity = height_map,
+                    .position = std::optional<Vector3>{new_pos},
                     .heights = chosen,
                     .n_x = n_x,
                     .n_y = n_y,
-                    .color = c});
+                    .color = c,
+                    .color_map = chosen_c_map});
             t_o = GetTime();
         }
+        // else{
+        //     visualizer.update_height_map(
+        //         rbvs::HeightMapUpdateParams{
+        //             .entity = height_map,
+        //             .position = std::optional<Vector3>{new_pos},
+        //             });
+        // }
 
         // visualizer.update_model(rbvs::ModelUpdateParams{
         //     .entity = sphere_entity,

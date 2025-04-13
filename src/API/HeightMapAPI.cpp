@@ -3,7 +3,7 @@
 namespace rbvs
 {
 
-    Texture create_heightmap_texture(const std::vector<Color> &color_map, int n_x, int n_y)
+    Texture create_heightmap_color_texture(const std::vector<Color> &color_map, int n_x, int n_y)
     {
         // Create an Image structure from the pixel buffer.
         Image formated_heightmap{
@@ -30,7 +30,7 @@ namespace rbvs
             .height = n_y,
             .mipmaps = 1,
             .format = PixelFormat::PIXELFORMAT_UNCOMPRESSED_GRAYSCALE};
-
+        
         return GenMeshHeightmap(formated_heightmap, (Vector3){1.0, 1.0, 1.0});
     }
 
@@ -47,6 +47,7 @@ namespace rbvs
             .scale = params.scale,
             .mesh = std::make_unique<Mesh>(create_heightmap_mesh(params.heights, params.n_x, params.n_y)),
             .color = params.color,
+            .color_map = create_heightmap_color_texture(params.color_map, params.n_x, params.n_y)
         };
 
         Entity e = this->entity_manager.create();
@@ -68,8 +69,19 @@ namespace rbvs
             hm.scale = *params.scale;
 
         // We might need to unload the texture from the GPU
-        if (params.heights && params.n_x && params.n_y)
+        if (params.heights && params.n_x && params.n_y){
+            if (hm.mesh) {
+                UnloadMesh(*hm.mesh); // Free GPU memory - (Without this line we will have a memory leak)
+            }
             hm.mesh = std::make_unique<Mesh>(create_heightmap_mesh(*params.heights, *params.n_x, *params.n_y));
+        }
+
+        if (params.color_map && params.n_x && params.n_y){
+            //if(hm.color_map)
+            UnloadTexture(hm.color_map);
+            hm.color_map = create_heightmap_color_texture(*params.color_map, *params.n_x, *params.n_y);
+        }
+            
 
         // if (params.heights) hm.heights =  std::move(*params.heights);
         //  if (params.n_x) hm.n_x =  *params.n_x;

@@ -45,7 +45,7 @@ namespace rbvs
         std::optional<size_t> n_x{};
         std::optional<size_t> n_y{};
         std::optional<Color> color{};          ///< Color (RGBA format).
-        std::optional<std::unique_ptr<std::vector<Color>>> color_map{};
+        std::optional<std::vector<Color>> color_map{};
         std::optional<bool> visible{};
     };
 
