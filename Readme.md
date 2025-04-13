@@ -11,11 +11,11 @@
 ## Table of Contents
 
 - [RoboVis](#robovis)
-- [Features](#features)
-- [Installation](#installation)
-  - [Prerequisites](#prerequisites)
-  - [Installing raylib](#installing-raylib)
-  - [Installing RoboVis](#installing-robovis)
+  - [Features](#features)
+  - [Installation](#installation)
+    - [Prerequisites](#prerequisites)
+    - [Installing raylib](#installing-raylib)
+    - [Installing RoboVis](#installing-robovis)
 
 # RoboVis
 
@@ -45,7 +45,7 @@ Before you begin, ensure you have met the following requirements:
 
 ### Installing raylib
 
-Raylib is a simple and easy-to-use library to enjoy videogames programming. Follow these steps to install raylib:
+Raylib is a simple and easy-to-use library for graphics programing and videogames. Follow these steps to install raylib (we are going to install raylib with openGL43 to be able to use the compute shader capabilities):
 
 ```bash
 sudo apt-get update
@@ -55,7 +55,7 @@ cd raylib
 mkdir build
 cd build
 cmake ..
-make
+cmake -DGRAPHICS=GRAPHICS_API_OPENGL_43 ..
 sudo make install
 ```
 
