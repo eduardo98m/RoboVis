@@ -24,6 +24,7 @@ out vec4 fragColor;
 
 // Constants for culling
 const float CULL_VALUE = 1e10;
+const float CULLING_MARGIN = 20.0;
 
 
 
@@ -115,7 +116,7 @@ void main() {
     vec4 worldPoint = modelMatrix * vec4(pointPosition, 1.0);
 
 
-    if (!isWithinDrawDistance(worldPoint.xyz, cameraPosition, maxDrawDistance) || !isPointInFrustum(worldPoint.xyz, 0.0, 5.0)  ){
+    if (!isWithinDrawDistance(worldPoint.xyz, cameraPosition, maxDrawDistance) || !isPointInFrustum(worldPoint.xyz, 0.0, CULLING_MARGIN)  ){
         gl_Position = vec4(0.0, 0.0, 0.0, 0.0);
         fragColor = vec4(0.0);
         return;
