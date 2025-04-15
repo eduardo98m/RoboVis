@@ -34,12 +34,10 @@ namespace rbvs
         return GenMeshHeightmap(formated_heightmap, (Vector3){1.0, 1.0, 1.0});
     }
 
-
-
     Entity Visualizer::create_height_map(const HeightMapParams &params)
     {
 
-        // We on>ly upload the texture once to the GPU
+        // We only upload the texture once to the GPU
 
         HeightMap hm = {
             .position = params.position,
@@ -47,9 +45,12 @@ namespace rbvs
             .scale = params.scale,
             .mesh = std::make_unique<Mesh>(create_heightmap_mesh(params.heights, params.n_x, params.n_y)),
             .color = params.color,
-            .color_map = create_heightmap_color_texture(params.color_map, params.n_x, params.n_y)
         };
 
+        if  (params.color_map){
+            hm.color_map =  create_heightmap_color_texture(*params.color_map, params.n_x, params.n_y);
+        }
+        
         Entity e = this->entity_manager.create();
         this->entity_manager.addComponent<HeightMap>(e, std::move(hm));
 
@@ -77,16 +78,11 @@ namespace rbvs
         }
 
         if (params.color_map && params.n_x && params.n_y){
-            //if(hm.color_map)
-            UnloadTexture(hm.color_map);
+            if(hm.color_map) UnloadTexture(*hm.color_map); // Only unload the texture if it exists  
+
             hm.color_map = create_heightmap_color_texture(*params.color_map, *params.n_x, *params.n_y);
         }
             
-
-        // if (params.heights) hm.heights =  std::move(*params.heights);
-        //  if (params.n_x) hm.n_x =  *params.n_x;
-        //  if (params.n_y) hm.n_y =  *params.n_y;
-        // if (params.color_map) hm.color_map = std::move(*params.color_map);
         if (params.color)
             hm.color = *params.color;
         if (params.visible)

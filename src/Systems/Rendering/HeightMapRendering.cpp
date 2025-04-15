@@ -40,8 +40,10 @@ namespace rbvs
 
             Material wires_mat = LoadMaterialDefault();
             wires_mat.maps[MaterialMapIndex::MATERIAL_MAP_DIFFUSE].color = WHITE;
+            mat.maps[MaterialMapIndex::MATERIAL_MAP_DIFFUSE].color = hm.color;
 
-            mat.maps[MaterialMapIndex::MATERIAL_MAP_DIFFUSE].texture = hm.color_map;
+            if (hm.color_map)
+                mat.maps[MaterialMapIndex::MATERIAL_MAP_DIFFUSE].texture = *hm.color_map;
             rlDisableBackfaceCulling();
             // if (hm.color.a < 255)rlDisableDepthMask();
             DrawMesh(*hm.mesh, mat, model_mat);

@@ -8,6 +8,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <optional>
 // pcl
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -73,8 +74,8 @@ namespace rbvs
         Quaternion orientation; // Orientation of the heightmap
         Vector3 scale; // Scale of the heightmap (x, y) are the side_lenghs z is for the heights scale
         std::unique_ptr<Mesh> mesh;
-        Color color; // Uniform color if no color map is enabled
-        Texture color_map; //  paramter for the heightmap color (Useful for cost-maps) (enabled if no nullptr)
+        Color color; // Uniform color if  color map is enabled (If the color_map is given this will apply a tint)
+        std::optional<Texture> color_map; //  paramter for the heightmap color (Useful for cost-maps) (enabled if no nullptr)
         bool visible = true;
     };
         

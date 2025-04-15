@@ -25,10 +25,10 @@ namespace rbvs
         Quaternion orientation = {0.0, 0.0, 0.0, 1.0}; ///< Model orientation as a quaternion.
         Vector3 scale = {1.0f, 1.0f, 1.0f};            ///< Scaling factors for the model.
         std::vector<float> &heights;
-        size_t n_x = 10;
+        size_t n_x = 10;         
         size_t n_y = 10;
-        Color color = {255, 255, 255, 255};            ///< Color (RGBA format).
-        std::vector<Color> &color_map; 
+        Color color = WHITE;            ///< Color (RGBA format).
+        std::optional<std::vector<Color>> color_map = {}; 
     };
 
     /**
@@ -45,7 +45,7 @@ namespace rbvs
         std::optional<size_t> n_x{};
         std::optional<size_t> n_y{};
         std::optional<Color> color{};          ///< Color (RGBA format).
-        std::optional<std::vector<Color>> color_map{};
+        std::optional<std::vector<Color>> color_map{}; // RGBA Array that will be used to create the texture
         std::optional<bool> visible{};
     };
 
