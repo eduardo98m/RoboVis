@@ -39,14 +39,14 @@ int main()
     // std::cin >> x;
 
     // Create a point cloud entity
-    // rbvs::Entity point_cloud_entity = visualizer.create_point_cloud(
-    //     rbvs::PointCloudParams{
-    //         .position = {10.0, 10.0, 0.0},
-    //         .orientation = QuaternionIdentity(),
-    //         .color = RED,
-    //         .scale = 0.05,
-    //         .cloud = cloud,
-    //         .marker_type = rbvs::PointCloud::Square});
+    rbvs::Entity point_cloud_entity = visualizer.create_point_cloud(
+        rbvs::PointCloudParams{
+            .position = {10.0, 10.0, 0.0},
+            .orientation = QuaternionIdentity(),
+            .color = RED,
+            .scale = 0.05,
+            .cloud = cloud,
+            .marker_type = rbvs::PointCloud::Square});
 
     size_t n_x = 200;
     size_t n_y = 200;
@@ -91,7 +91,7 @@ int main()
             .n_x = n_x,
             .n_y = n_y,
             .color = {.r = 0, .g = 255, .b = 58, .a = 75},
-            .color_map = color_map});
+            });
 
     // for ();
 
@@ -181,23 +181,23 @@ int main()
         //     .position = std::optional<Vector3>{new_pos},
         // });
 
-        if ((GetTime() - t_o) > 0.01)
-        {
-            latch = !latch;
-            auto &chosen = latch ? heights : heights_b;
-            auto &chosen_c_map = latch ? color_map : color_map_b;
-            Color c =  latch ? (Color){.r = 0, .g = 255, .b = 58, .a = 75} : (Color){.r = 255, .g = 0, .b = 58, .a = 75};
-            visualizer.update_height_map(
-                rbvs::HeightMapUpdateParams{
-                    .entity = height_map,
-                    .position = std::optional<Vector3>{new_pos},
-                    .heights = chosen,
-                    .n_x = n_x,
-                    .n_y = n_y,
-                    .color = c,
-                    .color_map = chosen_c_map});
-            t_o = GetTime();
-        }
+        // if ((GetTime() - t_o) > 0.5)
+        // {
+        //     latch = !latch;
+        //     auto &chosen = latch ? heights : heights_b;
+        //     auto &chosen_c_map = latch ? color_map : color_map_b;
+        //     Color c =  latch ? (Color){.r = 0, .g = 255, .b = 58, .a = 75} : (Color){.r = 255, .g = 0, .b = 58, .a = 75};
+        //     visualizer.update_height_map(
+        //         rbvs::HeightMapUpdateParams{
+        //             .entity = height_map,
+        //             .position = std::optional<Vector3>{new_pos},
+        //             .heights = chosen,
+        //             .n_x = n_x,
+        //             .n_y = n_y,
+        //             .color = c,
+        //             .color_map = chosen_c_map});
+        //     t_o = GetTime();
+        // }
         // else{
         //     visualizer.update_height_map(
         //         rbvs::HeightMapUpdateParams{
