@@ -5,6 +5,7 @@
 #include "rlImGui.h"
 // Standard Library
 #include <functional>
-#include <vector>
+#include <map>
+#include <string>
 
-void render_gui(std::vector<std::function<void(void)>> imgui_interfaces_calls);
+void render_gui(const std::map<std::string, std::function<void(void)>> &user_guis);

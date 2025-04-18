@@ -29,25 +29,49 @@
 
 namespace rbvs
 {
-    class Visualizer {
+    class Visualizer
+    {
     private:
-
         EntityManager entity_manager;
         RenderingSystem rendering_system;
         PreLoadedMeshes pre_loaded_meshes;
         UserCameraInputSystem camera_control_system;
         Camera3D camera;
+
+        std::map<std::string, std::function<void(void)>> user_guis; // User defined guis
+
         void set_up_camera(void);
         void pre_load_meshes(void);
-        
+
     public:
         Visualizer(int screen_width, int screen_height, const char *title);
 
         ~Visualizer();
 
         void update();
-        
-        
+
+        /**
+         * @brief Registers a GUI rendering function to be called each frame.
+         *
+         * Each GUI function must be associated with a unique name. If the name
+         * already exists in the `user_guis` map, the function will not be added.
+         *
+         * @param name A unique identifier for the GUI function.
+         * @param gui_function The GUI function to be invoked during the rendering loop.
+         * @return True if the function was successfully added; false if the name already exists.
+         */
+        bool add_gui(std::string name, std::function<void(void)> gui_function);
+
+        /**
+         * @brief Unregisters a GUI rendering function previously added with `add_gui`.
+         *
+         * The function identified by the given name will be removed from the `user_guis` map.
+         *
+         * @param name The name of the GUI function to remove.
+         * @return True if the function was found and removed; false otherwise.
+         */
+        bool remove_gui(std::string name);
+
         /**
          * @brief Creates a model entity
          */
@@ -73,13 +97,11 @@ namespace rbvs
 
         void update_height_map(const HeightMapUpdateParams &params);
 
-        //void delete_entity(Entity entity);
+        // void delete_entity(Entity entity);
 
         /**
-         * @brief  
+         * @brief
          * */
         void close();
-
-        
     };
 };

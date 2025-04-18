@@ -10,7 +10,7 @@ namespace rbvs
         height_map_rendering.load_shader();
     }
 
-    void RenderingSystem::update(EntityManager &em, Camera3D camera)
+    void RenderingSystem::update(EntityManager &em, Camera3D camera, const std::map<std::string, std::function<void(void)>> &user_guis)
     {
 
         BeginDrawing();
@@ -28,6 +28,9 @@ namespace rbvs
         rlImGuiBegin();
         // processUI(em);
         entity_setting_system.render_gui(em);
+
+        // User defined imgui interfaces
+        render_gui(user_guis);
 
         // Setings for the gizmos
         gizmo_renderer.render_settings_gui();

@@ -24,10 +24,16 @@ include_directories("src"
                     "thirdParty/rlImGui" 
                     "thirdParty/imgui" 
                     "thirdParty/rlights"
-                    "thirdParty/raylib-gizmo/src")
+                    "thirdParty/raylib-gizmo/src"
+                    "thirdParty/tinyxml2"
+                    )
 
 SET(RLIGHTS_SOURCES
     thirdParty/rlights/rlights.cpp)
+
+SET(TINYXML2_SOURCES
+    thirdParty/tinyxml2/tinyxml2.cpp)
+
 
 set(IMGUI_SOURCES
     thirdParty/imgui/imgui.cpp
@@ -48,6 +54,7 @@ set(SYSTEMS_SOURCES
     "src/Systems/Rendering/VisualModelRendering.cpp"
     "src/Systems/Rendering/GizmoRendering.cpp"
     "src/Systems/Rendering/PointCloudRendering.cpp"
+    "src/Systems/Rendering/GUIRendering.cpp"
     "src/Systems/Rendering/HeightMapRendering.cpp"
     "src/Systems/GUI/EntitySettings.cpp"
     "src/Systems/Rendering/ShaderManager.cpp"
@@ -65,6 +72,7 @@ set(API_SOURCES
     "src/API/GizmoAPI.cpp"
     "src/API/PointCloudAPI.cpp"
     "src/API/HeightMapAPI.cpp"
+    "src/API/GUIAPI.cpp"
 )
 
 
@@ -99,7 +107,8 @@ add_library(${PROJECT_NAME}
             ${ECS_SOURCES} 
             ${API_SOURCES} 
             ${SYSTEMS_SOURCES} 
-            ${IMGUI_SOURCES} 
+            ${IMGUI_SOURCES}
+            ${TINYXML2_SOURCES} 
             ${RAYMGUI_SOURCES} 
             ${RLIGHTS_SOURCES}
             ${RAYLIB_GIZMO_SOURCES})
@@ -112,6 +121,7 @@ add_executable(SpringMassSimulation
                 ${SYSTEMS_SOURCES} 
                 ${SOURCES} 
                 ${IMGUI_SOURCES} 
+                ${TINYXML2_SOURCES}
                 ${RAYMGUI_SOURCES} 
                 ${RLIGHTS_SOURCES}
                 ${RAYLIB_GIZMO_SOURCES})
