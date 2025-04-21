@@ -83,7 +83,8 @@ namespace rbvs
 
         void delete_model(Entity entity);
 
-        Entity create_point_cloud(PointCloudParams params);
+        template <typename PointT>
+        Entity create_point_cloud(PointCloudParams<PointT>  params);
 
         void update_point_cloud(PointCloudUpdateParams params);
 
@@ -105,3 +106,6 @@ namespace rbvs
         void close();
     };
 };
+
+// Template for hte pointclouds
+#include "API/PointCloudAPI.tpp"

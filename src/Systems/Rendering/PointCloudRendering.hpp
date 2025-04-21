@@ -12,12 +12,33 @@ namespace rbvs
     class PointCloudRenderingSystem
     {
     public:
+        /**
+         * @brief Function that initializes the renderer by loading the corresponding shaders
+         */
         void load_shader(); // Init function
+        /**
+         * @brief Update function called each rendering cycle
+         * @param em : The entity manager reference.
+         * @param camera : The camera object (needed for rendering operations) 
+         */
         void update(EntityManager &em,  Camera3D camera);
 
     private:
+        void update_shader_values(Shader &shdr, 
+            const Camera &camera, 
+            float scale,
+            const Matrix &model, 
+            const Matrix &view,
+            const Matrix &projection,
+            const PointCloudStyle::MarkerType &marker_type,
+            const PointCloudStyle::ColoringMode &coloring_mode,
+            const Color &point_color);
+
+
         Shader shader;
+        Shader color_pc_shader;
         float draw_distance = 100.0f;
+
 
         const Vector3 cube_vertices[8] = {
             // Front face

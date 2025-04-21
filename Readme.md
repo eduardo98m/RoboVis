@@ -86,3 +86,11 @@ cd build
 cmake ..
 make
 ```
+
+# Planned features
+
+* Colored Pointclouds. [Completed]
+* File IO (Pointclouds PLY and PCD and Meshes).
+* Scene Description format (XML).
+* Measurig tool. -> Interact with the environment.
+* Text tags.

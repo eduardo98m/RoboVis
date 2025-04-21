@@ -16,8 +16,11 @@ uniform vec3 CameraUp_worldspace;
 uniform float maxDrawDistance = 100;
 uniform vec3 cameraPosition;
 
-// SSBO containing point positions (Be ware of the memory layout)
-layout(std430, binding=0) buffer ssbo0 { vec3 positions[]; };
+// SSBO containing point positions
+layout(std430, binding=0) buffer ssbo0 { vec4 positions[]; };
+// SSBO containing point colors (optional)
+layout(std430, binding=1) buffer ssbo1 { vec4 colors[]; };
+
 
 // Output
 out vec4 fragColor;
@@ -97,7 +100,7 @@ bool isWithinDrawDistance(vec3 point, vec3 cameraPos, float maxDistance) {
 
 void main() {
     // Get the point position for this instance
-    vec3 pointPosition = positions[gl_InstanceID];
+    vec3 pointPosition = positions[gl_InstanceID].xyz;
     
     // Check if this point has been culled by the compute shader
     // if (pointPosition.x > CULL_VALUE * 0.5) {
@@ -148,7 +151,10 @@ void main() {
     );
     
     // Select the appropriate permutation
-    if (colorMode >= 1 && colorMode <= 3) {
+    if (colorMode == 4) {
+        fragColor = colors[gl_InstanceID];  // RGBA from buffer
+    }
+    else if (colorMode >= 1 && colorMode <= 3) {
         fragColor = vec4(
             normalizedPos[indices[colorMode - 1][0]],
             normalizedPos[indices[colorMode - 1][1]],

@@ -15,25 +15,26 @@
 
 namespace rbvs
 {
-
     /**
-     * @brief Struct holding parameters for creating a 3D pointcloud
+     * @brief Templated struct holding parameters for creating a 3D pointcloud
      */
+    template <typename PointT>
     struct PointCloudParams
     {
-        Vector3 position = {0.0f, 0.0f, 0.0f};         ///< Pointcloud base frame position in world space.
-        Quaternion orientation = {0.0, 0.0, 0.0, 1.0}; ///< Pointcloud base frame  orientation as a quaternion.
-        Color color = {255, 255, 255, 255};            ///< Color (RGBA format).
-        float scale = 1.0;
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
-        PointCloud::MarkerType marker_type = PointCloud::MarkerType::Cube;
-        PointCloud::ColoringMode coloring_mode = PointCloud::ColoringMode::SolidColor;
-    
+        Vector3 position = {0.0f, 0.0f, 0.0f};             ///< Pointcloud base frame position in world space.
+        Quaternion orientation = {0.0, 0.0, 0.0, 1.0};     ///< Pointcloud base frame orientation.
+        Color color = {255, 255, 255, 255};                ///< Used only if ColoringMode::SolidColor
+        float scale = 1.0f;
+
+        typename pcl::PointCloud<PointT>::Ptr cloud = std::make_shared<pcl::PointCloud<PointT>>();
+
+        PointCloudStyle::MarkerType marker_type = PointCloudStyle::MarkerType::Cube;
+        PointCloudStyle::ColoringMode coloring_mode = PointCloudStyle::ColoringMode::SolidColor;
     };
 
     /**
-     * @brief Struct for updating model properties dynamically.
-     *        Uses std::optional to allow partial updates without allocating heap memory.
+     * @brief Struct for updating pointcloud properties dynamically.
+     *        Uses std::optional to allow partial updates without allocations.
      */
     struct PointCloudUpdateParams
     {
@@ -43,8 +44,9 @@ namespace rbvs
         std::optional<Color> color{};
         std::optional<bool> visible{};
         std::optional<float> scale{};
-        std::optional<PointCloud::MarkerType> marker_type{};
-        std::optional<PointCloud::ColoringMode> coloring_mode{};  // New option
+        std::optional<PointCloudStyle::MarkerType> marker_type{};
+        std::optional<PointCloudStyle::ColoringMode> coloring_mode{};
     };
 
 } // namespace rbvs
+
