@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.14)
 
 project(RoboVis)
 
@@ -24,10 +24,16 @@ include_directories("src"
                     "thirdParty/rlImGui" 
                     "thirdParty/imgui" 
                     "thirdParty/rlights"
-                    "thirdParty/raylib-gizmo/src")
+                    "thirdParty/raylib-gizmo/src"
+                    "thirdParty/tinyxml2"
+                    )
 
 SET(RLIGHTS_SOURCES
     thirdParty/rlights/rlights.cpp)
+
+SET(TINYXML2_SOURCES
+    thirdParty/tinyxml2/tinyxml2.cpp)
+
 
 set(IMGUI_SOURCES
     thirdParty/imgui/imgui.cpp
@@ -48,6 +54,7 @@ set(SYSTEMS_SOURCES
     "src/Systems/Rendering/VisualModelRendering.cpp"
     "src/Systems/Rendering/GizmoRendering.cpp"
     "src/Systems/Rendering/PointCloudRendering.cpp"
+    "src/Systems/Rendering/GUIRendering.cpp"
     "src/Systems/Rendering/HeightMapRendering.cpp"
     "src/Systems/GUI/EntitySettings.cpp"
     "src/Systems/Rendering/ShaderManager.cpp"
@@ -65,14 +72,15 @@ set(API_SOURCES
     "src/API/GizmoAPI.cpp"
     "src/API/PointCloudAPI.cpp"
     "src/API/HeightMapAPI.cpp"
+    "src/API/GUIAPI.cpp"
 )
 
 
 
 set(SOURCES
-    src/DrawingUtils.cpp
-    src/Visualizer.cpp
-    src/Visualizer_visual_objects.cpp
+    # src/DrawingUtils.cpp
+    # src/Visualizer.cpp
+    # src/Visualizer_visual_objects.cpp
     "src/VisualizerNew.cpp"
 )
 
@@ -88,35 +96,46 @@ set(ECS_MAIN
     src/ecs_main.cpp
 )
 
-add_compile_definitions(SHADER_BASE_PATH="${CMAKE_SOURCE_DIR}/shaders")
+add_compile_definitions(SHADER_BASE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/shaders")
 
 # Skip RPATH to avoid conflicts with Anaconda libraries (Check this later )
 #set(CMAKE_SKIP_RPATH TRUE)
 
-# add_library(${PROJECT_NAME} ${SOURCES} ${IMGUI_SOURCES} ${RAYMGUI_SOURCES} ${RLIGHTS_SOURCES})
+add_library(${PROJECT_NAME}
+            ${SOURCES}
+            ${ECS_MAIN} 
+            ${ECS_SOURCES} 
+            ${API_SOURCES} 
+            ${SYSTEMS_SOURCES} 
+            ${IMGUI_SOURCES}
+            ${TINYXML2_SOURCES} 
+            ${RAYMGUI_SOURCES} 
+            ${RLIGHTS_SOURCES}
+            ${RAYLIB_GIZMO_SOURCES})
 
 
 add_executable(SpringMassSimulation 
                 ${ECS_MAIN} 
                 ${ECS_SOURCES} 
                 ${API_SOURCES} 
-                ${ENTITY_SOURCES} 
                 ${SYSTEMS_SOURCES} 
                 ${SOURCES} 
                 ${IMGUI_SOURCES} 
+                ${TINYXML2_SOURCES}
                 ${RAYMGUI_SOURCES} 
                 ${RLIGHTS_SOURCES}
                 ${RAYLIB_GIZMO_SOURCES})
-
-set_target_properties(SpringMassSimulation PROPERTIES
-    BUILD_RPATH_USE_ORIGIN TRUE
-    BUILD_RPATH "${CMAKE_SOURCE_DIR}/lib"
-)
 
 # set_target_properties(SpringMassSimulation PROPERTIES
 #     BUILD_RPATH_USE_ORIGIN TRUE
 #     BUILD_RPATH "${CMAKE_SOURCE_DIR}/lib"
 # )
 
-#target_link_libraries(${PROJECT_NAME} PRIVATE raylib ${PCL_LIBRARIES})
+# set_target_properties(SpringMassSimulation PROPERTIES
+#     BUILD_RPATH_USE_ORIGIN TRUE
+#     BUILD_RPATH "${CMAKE_SOURCE_DIR}/lib"
+# )
+
+
+target_link_libraries(${PROJECT_NAME} PRIVATE raylib ${PCL_LIBRARIES})
 target_link_libraries(SpringMassSimulation PRIVATE raylib ${PCL_LIBRARIES})

@@ -1,11 +1,11 @@
 #include "Systems/Rendering/GUIRendering.hpp"
 
-void render_gui(std::vector<std::function<void(void)>> imgui_interfaces_calls)
+void render_gui(const std::map<std::string, std::function<void(void)>> &user_guis)
 {
     
-    for (auto &imgui_interface_function : imgui_interfaces_calls)
-    {
-        imgui_interface_function();
+    for (const auto& [name, func] : user_guis) {
+        func(); // Call the function
     }
+    
     
 };

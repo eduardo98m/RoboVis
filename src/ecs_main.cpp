@@ -9,16 +9,23 @@
 
 #include <stdio.h>
 
+
+void gui_test(){
+    ImGui::Begin("Hello!");
+        ImGui::Text("I'm Testing gui registration");
+    ImGui::End();
+}
+
 int main()
 {
     // Initialize the visualizer
     rbvs::Visualizer visualizer = rbvs::Visualizer(1208, 720, "RoboVis");
 
     // Create a simple point cloud
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGBA>);
 
     float step = 0.5;
-    float lenght = 25 * step;
+    float lenght = 10 * step;
 
     for (float x = -lenght; x <= lenght; x += step)
     {
@@ -26,10 +33,16 @@ int main()
         {
             for (float z = -lenght; z <= lenght; z += step)
             {
-                cloud->points.push_back(pcl::PointXYZ(x, y, z));
+                cloud->points.push_back(pcl::PointXYZRGBA(x, y, z, 255, 0, 255, 255));
+                
             }
         }
     }
+
+
+    visualizer.add_gui("test gui", gui_test);
+
+    
 
     // 8 120 601 : 100
     // 13 997 521 : 120
@@ -39,14 +52,14 @@ int main()
     // std::cin >> x;
 
     // Create a point cloud entity
-    rbvs::Entity point_cloud_entity = visualizer.create_point_cloud(
-        rbvs::PointCloudParams{
+    rbvs::Entity point_cloud_entity = visualizer.create_point_cloud<pcl::PointXYZRGBA>(
+        rbvs::PointCloudParams<pcl::PointXYZRGBA>{
             .position = {10.0, 10.0, 0.0},
             .orientation = QuaternionIdentity(),
             .color = RED,
             .scale = 0.05,
             .cloud = cloud,
-            .marker_type = rbvs::PointCloud::Square});
+            .marker_type = rbvs::PointCloudStyle::Square});
 
     size_t n_x = 200;
     size_t n_y = 200;
@@ -176,10 +189,10 @@ int main()
         new_scale.x = 0.3 + sinf(GetTime());
         new_orientation = QuaternionFromEuler(0.0f, GetTime() * rotationSpeed, 0.0f);
 
-        // visualizer.update_point_cloud(rbvs::PointCloudUpdateParams{
-        //     .entity = point_cloud_entity,
-        //     .position = std::optional<Vector3>{new_pos},
-        // });
+        visualizer.update_point_cloud(rbvs::PointCloudUpdateParams{
+            .entity = point_cloud_entity,
+            .position = std::optional<Vector3>{new_pos},
+        });
 
         // if ((GetTime() - t_o) > 0.5)
         // {

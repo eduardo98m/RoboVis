@@ -4,3 +4,6 @@
 [submodule "thirdParty/rlImGui"]
 	path = thirdParty/rlImGui
 	url = https://github.com/raylib-extras/rlImGui.git
+[submodule "thirdParty/raylib-gizmo"]
+	path = thirdParty/raylib-gizmo
+	url = git@github.com:cloudofoz/raylib-gizmo.git

@@ -7,6 +7,7 @@
 #include "Systems/Rendering/ShaderManager.hpp"
 #include "Systems/GUI/EntitySettings.hpp"
 #include "Systems/Rendering/GizmoRendering.hpp"
+#include "Systems/Rendering/GUIRendering.hpp"
 
 #include "rlImGui.h"
 #include <raymath.h>
@@ -24,7 +25,7 @@ namespace rbvs {
     public:
         void init(void);    
 
-        void update(EntityManager& em, Camera3D camera);
+        void update(EntityManager& em, Camera3D camera, const std::map<std::string, std::function<void(void)>> &user_guis = {});
     
     private:
         VisualModelRenderingSystem visual_model_renderer;

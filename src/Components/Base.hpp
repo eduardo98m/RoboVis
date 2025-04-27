@@ -45,22 +45,51 @@ namespace rbvs
         float lifetime;
     };
 
+    // Exclusive enums for the pointcloud type
+    namespace PointCloudStyle
+    {
+        /// Marker rendering styles
+        enum MarkerType
+        {
+            Cube,
+            Square
+        };
+
+        /// Coloring strategies
+        enum ColoringMode
+        {
+            SolidColor,
+            ColorByAxisX,
+            ColorByAxisY,
+            ColorByAxisZ,
+            PointColor // for RGB/rgba
+        };
+    }
+
+    
+    template <typename PointT>
     struct PointCloud
     {
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
-        Vector3 position;
-        Quaternion orientation;
-        Color color;
+        typename pcl::PointCloud<PointT>::Ptr cloud = std::make_shared<pcl::PointCloud<PointT>>();
 
-        enum MarkerType {Cube, Square} marker_type = Cube;  // New option for coloring mode
-        enum ColoringMode { SolidColor, ColorByAxisX, ColorByAxisY, ColorByAxisZ } coloring_mode = ColoringMode::SolidColor;  // New option for coloring mode
-        
+        Vector3 position{};
+        Quaternion orientation{};
+        Color color{};  // Used only if coloring_mode == SolidColor
+
+        PointCloudStyle::MarkerType marker_type = PointCloudStyle::MarkerType::Cube;
+        PointCloudStyle::ColoringMode coloring_mode = PointCloudStyle::ColoringMode::SolidColor;
+
         bool visible = true;
-        float scale = 1.0;
+        float scale = 1.0f;
         int ssboID = 0;
-        
+        int color_ssboID= 0;
+
+        // Position and color buffers (For passing data to the shader / Only used on the RGBA pointclouds)
+        std::vector<Vector4> pos_buffer = {};
+        std::vector<Vector4> color_buffer = {};
     };
-    
+
+
     struct Gizmo
     {
         Transform transform;

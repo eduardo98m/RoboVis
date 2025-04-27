@@ -29,7 +29,7 @@ namespace rbvs
     void Visualizer::update()
     {
         camera_control_system.update_camera(this->camera);
-        rendering_system.update(entity_manager, this->camera);
+        rendering_system.update(entity_manager, this->camera, this->user_guis);
     }
 
 
