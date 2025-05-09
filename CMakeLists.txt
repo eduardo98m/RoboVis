@@ -58,6 +58,9 @@ set(SYSTEMS_SOURCES
     "src/Systems/Rendering/HeightMapRendering.cpp"
     "src/Systems/GUI/EntitySettings.cpp"
     "src/Systems/Rendering/ShaderManager.cpp"
+
+
+    "src/Systems/EntitySelection.cpp"
 )
 
 

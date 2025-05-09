@@ -189,10 +189,10 @@ int main()
         new_scale.x = 0.3 + sinf(GetTime());
         new_orientation = QuaternionFromEuler(0.0f, GetTime() * rotationSpeed, 0.0f);
 
-        visualizer.update_point_cloud(rbvs::PointCloudUpdateParams{
-            .entity = point_cloud_entity,
-            .position = std::optional<Vector3>{new_pos},
-        });
+        // visualizer.update_point_cloud(rbvs::PointCloudUpdateParams{
+        //     .entity = point_cloud_entity,
+        //     .position = std::optional<Vector3>{new_pos},
+        // });
 
         // if ((GetTime() - t_o) > 0.5)
         // {

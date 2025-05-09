@@ -18,6 +18,7 @@
 #include "ECS/EntityManager.hpp"
 // Internal - Systems
 #include "Systems/Rendering/Rendering.hpp"
+#include "Systems/EntitySelection.hpp"
 #include "Systems/UserCameraInput.hpp"
 #include "Systems/GUI/EntitySettings.hpp"
 
@@ -34,6 +35,7 @@ namespace rbvs
     private:
         EntityManager entity_manager;
         RenderingSystem rendering_system;
+        EntitySelectionSystem entity_selection_system;
         PreLoadedMeshes pre_loaded_meshes;
         UserCameraInputSystem camera_control_system;
         Camera3D camera;

@@ -30,6 +30,7 @@ namespace rbvs
     {
         camera_control_system.update_camera(this->camera);
         rendering_system.update(entity_manager, this->camera, this->user_guis);
+        entity_selection_system.handle_click(entity_manager, this->camera);
     }
 
 
