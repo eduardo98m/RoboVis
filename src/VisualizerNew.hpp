@@ -21,6 +21,8 @@
 #include "Systems/EntitySelection.hpp"
 #include "Systems/UserCameraInput.hpp"
 #include "Systems/GUI/EntitySettings.hpp"
+#include "Systems/Serialization.hpp"
+
 
 // Internal - API
 #include "API/Model.hpp"
@@ -38,6 +40,8 @@ namespace rbvs
         EntitySelectionSystem entity_selection_system;
         PreLoadedMeshes pre_loaded_meshes;
         UserCameraInputSystem camera_control_system;
+        SerializationSystem serialization_system;
+
         Camera3D camera;
 
         std::map<std::string, std::function<void(void)>> user_guis; // User defined guis
@@ -51,6 +55,10 @@ namespace rbvs
         ~Visualizer();
 
         void update();
+
+        void save(){
+            this->serialization_system.serialize(this->entity_manager, "/home/eduardo/Documents/Moonshoot/ms-viz/", "world");
+        };
 
         /**
          * @brief Registers a GUI rendering function to be called each frame.
