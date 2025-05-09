@@ -61,6 +61,7 @@ set(SYSTEMS_SOURCES
 
 
     "src/Systems/EntitySelection.cpp"
+    "src/Systems/Serialization.cpp"
 )
 
 
