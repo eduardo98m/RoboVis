@@ -22,6 +22,7 @@ add_definitions(${PCL_DEFINITIONS})
 
 include_directories("src" 
                     "thirdParty/rlImGui" 
+                    "thirdParty/imgui-filebrowser" 
                     "thirdParty/imgui" 
                     "thirdParty/rlights"
                     "thirdParty/raylib-gizmo/src"
