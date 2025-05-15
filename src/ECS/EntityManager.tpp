@@ -2,8 +2,6 @@
 #include "ECS/EntityManager.hpp"
 #include <tuple>
 
-
-
 namespace rbvs
 {
 
@@ -29,6 +27,21 @@ namespace rbvs
         auto pool = static_cast<ComponentPool<T> *>(componentPools[type].get());
         return pool->get(e);
     }
+
+    template <typename T>
+    bool EntityManager::hasComponent(Entity e) const
+    {
+        auto type = std::type_index(typeid(T));
+        // If there is no component pool for the requested type then there is no component
+        auto it = componentPools.find(type);
+        if (it == componentPools.end())
+        {
+            return false;
+        }
+        //auto pool = static_cast<ComponentPool<T> *>(componentPools[type].get());
+        auto pool = static_cast<ComponentPool<T> *>(it->second.get());
+        return pool->has(e);
+    };
 
     template <typename... Ts>
     std::vector<Entity> EntityManager::view()
