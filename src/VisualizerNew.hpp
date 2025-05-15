@@ -22,6 +22,7 @@
 #include "Systems/UserCameraInput.hpp"
 #include "Systems/GUI/EntitySettings.hpp"
 #include "Systems/Serialization.hpp"
+#include "Systems/GizmoInteraction.hpp"
 
 
 // Internal - API
@@ -41,6 +42,7 @@ namespace rbvs
         PreLoadedMeshes pre_loaded_meshes;
         UserCameraInputSystem camera_control_system;
         SerializationSystem serialization_system;
+        GizmoInteractionSystem gizmo_interaction_system;
 
         Camera3D camera;
 
