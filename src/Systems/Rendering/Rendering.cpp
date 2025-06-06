@@ -21,6 +21,7 @@ namespace rbvs
         visual_model_renderer.update(em);
         point_cloud_renderer.update(em, camera);
         height_map_rendering.update(em, camera);
+        map_renderer.update(em, camera);
         gizmo_renderer.update(em);
 
 

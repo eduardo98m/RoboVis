@@ -30,6 +30,7 @@
 #include "API/PointCloud.hpp"
 #include "API/HeightMap.hpp"
 #include "API/Gizmo.hpp"
+#include "API/Map.hpp"
 
 namespace rbvs
 {
@@ -109,6 +110,13 @@ namespace rbvs
         Entity create_height_map(const HeightMapParams &params);
 
         void update_height_map(const HeightMapUpdateParams &params);
+        
+        Entity create_map(MapParams params);
+
+        void update_map(MapUpdateParams params);
+
+        void delete_map(Entity entity);
+
 
         // void delete_entity(Entity entity);
 

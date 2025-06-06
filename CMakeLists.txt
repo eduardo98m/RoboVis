@@ -57,6 +57,7 @@ set(SYSTEMS_SOURCES
     "src/Systems/Rendering/PointCloudRendering.cpp"
     "src/Systems/Rendering/GUIRendering.cpp"
     "src/Systems/Rendering/HeightMapRendering.cpp"
+    "src/Systems/Rendering/MapRendering.cpp"
     "src/Systems/GUI/EntitySettings.cpp"
     "src/Systems/Rendering/ShaderManager.cpp"
     "src/Systems/GizmoInteraction.cpp"
@@ -78,14 +79,12 @@ set(API_SOURCES
     "src/API/PointCloudAPI.cpp"
     "src/API/HeightMapAPI.cpp"
     "src/API/GUIAPI.cpp"
+    "src/API/MapAPI.cpp"
 )
 
 
 
 set(SOURCES
-    # src/DrawingUtils.cpp
-    # src/Visualizer.cpp
-    # src/Visualizer_visual_objects.cpp
     "src/VisualizerNew.cpp"
 )
 
