@@ -8,6 +8,7 @@
 #include "Systems/GUI/EntitySettings.hpp"
 #include "Systems/Rendering/GizmoRendering.hpp"
 #include "Systems/Rendering/GUIRendering.hpp"
+#include "Systems/Rendering/MapRendering.hpp"
 
 #include "rlImGui.h"
 #include <raymath.h>
@@ -27,12 +28,13 @@ namespace rbvs {
 
         void update(EntityManager& em, Camera3D camera, const std::map<std::string, std::function<void(void)>> &user_guis = {});
     
-    private:
+    public:
         VisualModelRenderingSystem visual_model_renderer;
         PointCloudRenderingSystem point_cloud_renderer;
         HeightMapRenderingSystem height_map_rendering;
         EntitySettingsSystem entity_setting_system;
         GizmoRenderingSystem gizmo_renderer;
+        MapRenderingSystem map_renderer;
 
         ShaderManagerSystem shader_manager_system = ShaderManagerSystem();
     };

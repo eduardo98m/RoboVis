@@ -7,3 +7,6 @@
 [submodule "thirdParty/raylib-gizmo"]
 	path = thirdParty/raylib-gizmo
 	url = git@github.com:cloudofoz/raylib-gizmo.git
+[submodule "thirdParty/imgui-filebrowser"]
+	path = thirdParty/imgui-filebrowser
+	url = git@github.com:AirGuanZ/imgui-filebrowser.git

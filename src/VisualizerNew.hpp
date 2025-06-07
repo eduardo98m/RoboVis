@@ -18,14 +18,19 @@
 #include "ECS/EntityManager.hpp"
 // Internal - Systems
 #include "Systems/Rendering/Rendering.hpp"
+#include "Systems/EntitySelection.hpp"
 #include "Systems/UserCameraInput.hpp"
 #include "Systems/GUI/EntitySettings.hpp"
+#include "Systems/Serialization.hpp"
+#include "Systems/GizmoInteraction.hpp"
+
 
 // Internal - API
 #include "API/Model.hpp"
 #include "API/PointCloud.hpp"
 #include "API/HeightMap.hpp"
 #include "API/Gizmo.hpp"
+#include "API/Map.hpp"
 
 namespace rbvs
 {
@@ -34,8 +39,12 @@ namespace rbvs
     private:
         EntityManager entity_manager;
         RenderingSystem rendering_system;
+        EntitySelectionSystem entity_selection_system;
         PreLoadedMeshes pre_loaded_meshes;
         UserCameraInputSystem camera_control_system;
+        SerializationSystem serialization_system;
+        GizmoInteractionSystem gizmo_interaction_system;
+
         Camera3D camera;
 
         std::map<std::string, std::function<void(void)>> user_guis; // User defined guis
@@ -49,6 +58,10 @@ namespace rbvs
         ~Visualizer();
 
         void update();
+
+        void save(){
+            this->serialization_system.serialize(this->entity_manager, "/home/eduardo/Documents/Moonshoot/ms-viz/", "world");
+        };
 
         /**
          * @brief Registers a GUI rendering function to be called each frame.
@@ -97,6 +110,13 @@ namespace rbvs
         Entity create_height_map(const HeightMapParams &params);
 
         void update_height_map(const HeightMapUpdateParams &params);
+        
+        Entity create_map(MapParams params);
+
+        void update_map(MapUpdateParams params);
+
+        void delete_map(Entity entity);
+
 
         // void delete_entity(Entity entity);
 

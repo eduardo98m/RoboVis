@@ -70,6 +70,16 @@ public:
     T& getComponent(Entity e);
 
     /**
+     * @brief Check if an entity has a certain component
+     *
+     * @tparam T The type of the component.
+     * @param e The entity whose component is being checked
+     * @return T& A reference to the component.
+     */    
+    template<typename T>
+    bool hasComponent(Entity e) const;
+
+    /**
      * @brief Returns a list of entities that have all the specified component types.
      *
      * This function creates a view of entities that contain all specified components by constructing a

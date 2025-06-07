@@ -118,8 +118,8 @@ void main() {
     // Compute world-space position of the point
     vec4 worldPoint = modelMatrix * vec4(pointPosition, 1.0);
 
-
-    if (!isWithinDrawDistance(worldPoint.xyz, cameraPosition, maxDrawDistance) || !isPointInFrustum(worldPoint.xyz, 0.0, CULLING_MARGIN)  ){
+    // || !isPointInFrustum(worldPoint.xyz, 0.0, CULLING_MARGIN) Disabling the culling for the moment
+    if (!isWithinDrawDistance(worldPoint.xyz, cameraPosition, maxDrawDistance)   ){
         gl_Position = vec4(0.0, 0.0, 0.0, 0.0);
         fragColor = vec4(0.0);
         return;

@@ -3,7 +3,8 @@
 namespace rbvs
 {
 
-    Visualizer::Visualizer(int screen_width, int screen_height, const char *title)
+    Visualizer::Visualizer(int screen_width, int screen_height, const char *title):  
+                gizmo_interaction_system(this->entity_manager)
     {
         SetConfigFlags(FLAG_WINDOW_RESIZABLE);
         InitWindow(screen_width, screen_height, title);
@@ -13,6 +14,7 @@ namespace rbvs
         this->set_up_camera();
         this->pre_load_meshes();
         this->rendering_system.init();
+       ;
     };
 
     void Visualizer::set_up_camera()
@@ -30,6 +32,8 @@ namespace rbvs
     {
         camera_control_system.update_camera(this->camera);
         rendering_system.update(entity_manager, this->camera, this->user_guis);
+        entity_selection_system.handle_click(entity_manager, this->camera);
+        gizmo_interaction_system.update(entity_manager, this->camera, entity_selection_system.get_selected_entity());
     }
 
 
