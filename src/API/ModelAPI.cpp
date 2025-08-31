@@ -1,5 +1,4 @@
 #include "VisualizerNew.hpp"
-#include <initializer_list>
 #include <raylib.h>
 #include <raymath.h>
 #include <string>
@@ -8,30 +7,27 @@ namespace rbvs
 
   void TransformMesh(Mesh *mesh, Matrix transform)
   {
-    // 1. Transformar vértices
+    // Vertex
     for (int i = 0; i < mesh->vertexCount; i++)
     {
-      Vector3 pos = {
-          mesh->vertices[i * 3 + 0],
-          mesh->vertices[i * 3 + 1],
-          mesh->vertices[i * 3 + 2]};
+      Vector3 pos = {mesh->vertices[i * 3 + 0], mesh->vertices[i * 3 + 1],
+                     mesh->vertices[i * 3 + 2]};
       pos = Vector3Transform(pos, transform);
       mesh->vertices[i * 3 + 0] = pos.x;
       mesh->vertices[i * 3 + 1] = pos.y;
       mesh->vertices[i * 3 + 2] = pos.z;
     }
 
-    // 2. Transformar normales (sin traslación)
+    // Rotate normals
     if (mesh->normals)
     {
       Matrix normalMatrix = transform;
-      normalMatrix.m12 = normalMatrix.m13 = normalMatrix.m14 = 0.0f; // quitar traslación
+      normalMatrix.m12 = normalMatrix.m13 = normalMatrix.m14 =
+          0.0f; // quitar traslación
       for (int i = 0; i < mesh->vertexCount; i++)
       {
-        Vector3 norm = {
-            mesh->normals[i * 3 + 0],
-            mesh->normals[i * 3 + 1],
-            mesh->normals[i * 3 + 2]};
+        Vector3 norm = {mesh->normals[i * 3 + 0], mesh->normals[i * 3 + 1],
+                        mesh->normals[i * 3 + 2]};
         norm = Vector3Transform(norm, normalMatrix);
         norm = Vector3Normalize(norm);
         mesh->normals[i * 3 + 0] = norm.x;
@@ -39,8 +35,6 @@ namespace rbvs
         mesh->normals[i * 3 + 2] = norm.z;
       }
     }
-    // UnloadMesh(*mesh);
-    //UploadMesh(mesh, true); // false -> no re-generar VAO, solo actualizar buffers
 
     if (mesh->vaoId == 0)
     {
@@ -50,18 +44,20 @@ namespace rbvs
     else
     {
       // If mesh already exists on GPU, update the vertex buffer
-      UpdateMeshBuffer(*mesh, 0, mesh->vertices, mesh->vertexCount * 3 * sizeof(float), 0);
+      UpdateMeshBuffer(*mesh, 0, mesh->vertices,
+                       mesh->vertexCount * 3 * sizeof(float), 0);
 
       // Update normals buffer if it exists
       if (mesh->normals)
       {
-        UpdateMeshBuffer(*mesh, 2, mesh->normals, mesh->vertexCount * 3 * sizeof(float), 0);
+        UpdateMeshBuffer(*mesh, 2, mesh->normals,
+                         mesh->vertexCount * 3 * sizeof(float), 0);
       }
     }
   }
 
-  void Visualizer::register_model(
-      std::string model_name, std::initializer_list<ModelPrimitive> primitives)
+  void Visualizer::register_model(std::string model_name,
+                                  std::vector<ModelPrimitive> primitives)
   {
     if (this->registered_models.count(model_name))
     {
@@ -99,18 +95,29 @@ namespace rbvs
       case ModelPrimitiveType::HEMISPHERE:
         mesh = GenMeshHemiSphere(primitive.radius, 32, 32);
         break;
+      case ModelPrimitiveType::TORUS:
+        mesh = GenMeshTorus(primitive.radius, primitive.size, 32, 32);
+        break;
+      case ModelPrimitiveType::POLYGON:
+      {
+        if (primitive.sides < 3)
+          std::cerr << "Warning, triying to create polygon with less than 3 "
+                       "sides -> mesh wont be created";
+        mesh = GenMeshPoly(primitive.sides, primitive.radius);
+        break;
+      }
       default:
         std::cerr << "Warning: Unsupported primitive type in register_model.\n";
         continue;
       }
       Matrix transform_matrix = MatrixMultiply(
-          MatrixTranslate(primitive.position.x,
-                          primitive.position.y,
-                          primitive.position.z),
-          QuaternionToMatrix(primitive.orientation));
+          QuaternionToMatrix(primitive.orientation),
+          MatrixTranslate(primitive.position.x, primitive.position.y,
+                          primitive.position.z));
       TransformMesh(&mesh, transform_matrix);
 
-      material.maps[MaterialMapIndex::MATERIAL_MAP_DIFFUSE].color = primitive.color;
+      material.maps[MaterialMapIndex::MATERIAL_MAP_DIFFUSE].color =
+          primitive.color;
       materials.push_back(material);
       meshes.push_back(mesh);
     }
@@ -129,13 +136,17 @@ namespace rbvs
 
     // Allocate Raylib-owned memory
     model.meshes = static_cast<Mesh *>(MemAlloc(sizeof(Mesh) * model.meshCount));
-    model.materials = static_cast<Material *>(MemAlloc(sizeof(Material) * model.materialCount));
-    model.meshMaterial = static_cast<int *>(MemAlloc(sizeof(int) * model.meshCount));
+    model.materials =
+        static_cast<Material *>(MemAlloc(sizeof(Material) * model.materialCount));
+    model.meshMaterial =
+        static_cast<int *>(MemAlloc(sizeof(int) * model.meshCount));
 
     // Copy to Raylib's struct
     std::memcpy(model.meshes, tmpMeshes.data(), sizeof(Mesh) * model.meshCount);
-    std::memcpy(model.materials, tmpMaterials.data(), sizeof(Material) * model.materialCount);
-    std::memcpy(model.meshMaterial, tmpMeshMaterial.data(), sizeof(int) * model.meshCount);
+    std::memcpy(model.materials, tmpMaterials.data(),
+                sizeof(Material) * model.materialCount);
+    std::memcpy(model.meshMaterial, tmpMeshMaterial.data(),
+                sizeof(int) * model.meshCount);
     this->registered_models[model_name] = model;
   };
 
@@ -144,12 +155,11 @@ namespace rbvs
 
     Mesh mesh;
 
-    VisualModel vm = {
-        .position = params.position,
-        .orientation = params.orientation,
-        .scale = params.scale,
-        .color = params.color,
-    };
+    VisualModel vm = {.position = params.position,
+                      .orientation = params.orientation,
+                      .scale = params.scale,
+                      .color = params.color,
+                      .receive_lighting = params.receive_lighting};
 
     // GenMeshCylinder(radius, height, 16);
     switch (params.model_type)
@@ -183,18 +193,29 @@ namespace rbvs
       break;
     case ModelType::CUSTOM:
     {
-
-      vm.model = std::make_unique<Model>(this->registered_models[params.custom_model_key]);
-      if (vm.model)
+      if (this->registered_models.count(params.custom_model_key))
       {
-        std::cerr << "MODEL CREATED: meshCount=" << vm.model->meshCount
-                  << " materialCount=" << vm.model->materialCount
-                  << " transform: [0][0]=" << vm.model->transform.m0 << "\n";
+        vm.model = std::make_unique<Model>(
+            this->registered_models[params.custom_model_key]);
+      }
+      else
+      {
+        std::cerr << "Model " << params.custom_model_key
+                  << " is not a registered model";
       }
       break;
     }
     default:
       break;
+    }
+
+    // Assing the correct shader to the model
+    if (vm.model && vm.receive_lighting)
+    {
+      for (int i = 0; i < vm.model->materialCount; i++)
+      {
+        vm.model->materials[i].shader = this->rendering_system.lighting_system.lit_shader();
+      }
     }
 
     Entity e = this->entity_manager.create();
@@ -206,7 +227,7 @@ namespace rbvs
   void Visualizer::update_model(ModelUpdateParams params)
   {
     // TODO : We need a way to avoid getting empty components (i.e. the entity
-    // doenst have the component)
+    // does not have the component)
     VisualModel &vm =
         this->entity_manager.getComponent<VisualModel>(params.entity);
 
@@ -220,6 +241,25 @@ namespace rbvs
       vm.color = *params.color;
     if (params.visible)
       vm.visible = *params.visible;
+    if (params.receive_lighting)
+    {
+      vm.receive_lighting = *params.receive_lighting;
+      if (vm.receive_lighting)
+      {
+        for (int i = 0; i < vm.model->materialCount; i++)
+        {
+          vm.model->materials[i].shader = this->rendering_system.lighting_system.lit_shader();
+        }
+      }
+      else
+      {
+        Material mat = LoadMaterialDefault(); // TODO : This might be somwhat of a hack but it works ._.
+        for (int i = 0; i < vm.model->materialCount; i++)
+        {
+          vm.model->materials[i].shader = mat.shader;
+        }
+      }
+    }
   }
 
   void Visualizer::delete_model(Entity entity)

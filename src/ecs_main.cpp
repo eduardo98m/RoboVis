@@ -1,18 +1,23 @@
+#include "API/Model.hpp"
+#include "Components/Base.hpp"
 #include "ECS/Entity.hpp"
 #include "VisualizerNew.hpp"
 #include "raylib.h"
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <raymath.h>
 #include <stdio.h>
 #include <vector>
 
-void gui_test() {
+void gui_test()
+{
   ImGui::Begin("Hello!");
   ImGui::Text("I'm Testing gui registration");
   ImGui::End();
 }
 
-int main() {
+int main()
+{
   // Initialize the visualizer
   rbvs::Visualizer visualizer = rbvs::Visualizer(1208, 720, "RoboVis");
 
@@ -23,34 +28,16 @@ int main() {
   float step = 0.5;
   float lenght = 10 * step;
 
-  for (float x = -lenght; x <= lenght; x += step) {
-    for (float y = -lenght; y <= lenght; y += step) {
-      for (float z = -lenght; z <= lenght; z += step) {
+  for (float x = -lenght; x <= lenght; x += step)
+  {
+    for (float y = -lenght; y <= lenght; y += step)
+    {
+      for (float z = -lenght; z <= lenght; z += step)
+      {
         cloud->points.push_back(pcl::PointXYZRGBA(x, y, z, 255, 0, 255, 255));
       }
     }
   }
-
-  // How can i make a mesh from the visualizer (or better yet)
-  // a model (textured mesh) using the visualizer as the interface
-  // for example
-  // visualizer.register_mesh("custom_axes_indicator", {{
-  // .type = CYLINDER,
-  // .radius = 5.0,
-  // .height = 10.0,
-  // .position = {0.0, 1.0, 0.0} // Position relative to the center of the mesh
-  // .orientation = {0.0, 0.0, 0.0, 1.0},
-  // .color = RED
-  // },
-  // ModelPrimitiveParam{
-  //  .type = BOX,
-  //  .half_widths = {1.0, 0.1, 0.5},
-  // }})
-  //
-  // Then we can create multiple instances of the model ia the create_model
-  //
-  // Entity = visualizer.create_model(rbvs::ModelParams{..., .type =
-  // REGISTERED_MODEL, .model_name = "custom _axes_indicator" })
 
   visualizer.add_gui("test gui", gui_test);
 
@@ -78,8 +65,10 @@ int main() {
   std::vector<float> heights(n_x * n_y, 0.0f);
   std::vector<Color> color_map(n_x * n_y, WHITE);
 
-  for (int i = 0; i < n_x; i++) {
-    for (int j = 0; j <= n_y; j++) {
+  for (int i = 0; i < n_x; i++)
+  {
+    for (int j = 0; j <= n_y; j++)
+    {
       float x = (i > j) ? (0.1) : (0.2);
       Color c = (i % 2) ? (Color){.r = 0, .g = 255, .b = 58, .a = 75}
                         : (Color){.r = 255, .g = 0, .b = 58, .a = 75};
@@ -92,8 +81,10 @@ int main() {
 
   std::vector<Color> color_map_b(n_x * n_y, WHITE);
 
-  for (int i = 0; i < n_x; i++) {
-    for (int j = 0; j <= n_y; j++) {
+  for (int i = 0; i < n_x; i++)
+  {
+    for (int j = 0; j <= n_y; j++)
+    {
       float x = (i > j) ? (0.2) : (0.1);
       Color c = (i % 2) ? (Color){.r = 125, .g = 30, .b = 58, .a = 75}
                         : (Color){.r = 0, .g = 120, .b = 58, .a = 75};
@@ -112,39 +103,52 @@ int main() {
       .color = {.r = 0, .g = 255, .b = 58, .a = 75},
   });
 
-  // for ();
+  rbvs::Entity light =
+      visualizer.create_light({.position = {0.0, 0.0, 10},
+                               .direction = {0.0, 0.0, -1.0},
+                               .type = rbvs::LightType::POINT,
+                               .intensity = 1.0});
+  
+  for (int i = 0; i < 20; ++i){
+    for (int j = 0; j < 20; ++j){
+      visualizer.create_light({.position = {static_cast<float>(i), static_cast<float>(j), 2.0},
+                              //  .direction = {0.0, 0.0, -1.0},
+                               .type = rbvs::LightType::POINT,
+                               .intensity = 1.0});
+  }
+  }
 
-  // rbvs::Entity cylinder_entity = visualizer.create_model(rbvs::ModelParams{
-  //     .position = {1.0, 0.0, 1.0},
-  //     .color = {255, 0, 0, 255},
-  //     .model_type = rbvs::ModelType::CYLINDER,
-  //     .radius = 0.1,
-  //     .length = 5.0,
-  // });
+  rbvs::Entity cylinder_entity = visualizer.create_model(rbvs::ModelParams{
+      .position = {1.0, 0.0, 1.0},
+      .color = {255, 0, 0, 255},
+      .model_type = rbvs::ModelType::CYLINDER,
+      .radius = 0.1,
+      .length = 5.0,
+  });
 
-  // visualizer.create_model(rbvs::ModelParams{
-  //     .position = {1.0, 0.0, -1.0},
-  //     .color = {255, 0, 0, 255},
-  //     .model_type = rbvs::ModelType::CYLINDER,
-  //     .radius = 0.1,
-  //     .length = 5.0,
-  // });
+  visualizer.create_model(rbvs::ModelParams{
+      .position = {1.0, 0.0, -1.0},
+      .color = {255, 0, 0, 255},
+      .model_type = rbvs::ModelType::CYLINDER,
+      .radius = 0.1,
+      .length = 5.0,
+  });
 
-  // visualizer.create_model(rbvs::ModelParams{
-  //     .position = {-1.0, 0.0, -1.0},
-  //     .color = {255, 0, 0, 255},
-  //     .model_type = rbvs::ModelType::CYLINDER,
-  //     .radius = 0.1,
-  //     .length = 5.0,
-  // });
+  visualizer.create_model(rbvs::ModelParams{
+      .position = {-1.0, 0.0, -1.0},
+      .color = {255, 0, 0, 255},
+      .model_type = rbvs::ModelType::CYLINDER,
+      .radius = 0.1,
+      .length = 5.0,
+  });
 
-  // visualizer.create_model(rbvs::ModelParams{
-  //     .position = {-1.0, 0.0, 1.0},
-  //     .color = {255, 0, 0, 255},
-  //     .model_type = rbvs::ModelType::CYLINDER,
-  //     .radius = 0.1,
-  //     .length = 5.0,
-  // });
+  visualizer.create_model(rbvs::ModelParams{
+      .position = {-1.0, 0.0, 1.0},
+      .color = {255, 0, 0, 255},
+      .model_type = rbvs::ModelType::CYLINDER,
+      .radius = 0.1,
+      .length = 5.0,
+  });
 
   // rbvs::Entity cone_entity = visualizer.create_model(rbvs::ModelParams{
   //     .position = {4.0, 0.0, 2.0},
@@ -166,36 +170,64 @@ int main() {
   //     .position = {0.0, 0.0, -2.0},
   // });
 
+  float total_lenght = 1.0;
+  float tip_radius = 0.1;
+  float cylinder_radius = tip_radius * 0.5;
+  float cylinder_length = total_lenght * 0.8;
+  float tip_height = total_lenght - cylinder_length;
 
-  visualizer.register_model("customModel", {
-    rbvs::ModelPrimitive{
-      .position = {0.0, 2.5, 0.0},
-      .type = rbvs::ModelPrimitiveType::SPHERE,
-      .radius = 1.5,
-      .color = RED // Default color
-    },
-    rbvs::ModelPrimitive{
-      .orientation = QuaternionFromEuler(0.0, 0.0, 0.0),
-      .type = rbvs::ModelPrimitiveType::BOX,
-      .half_extents = {1.0, 3.0, 1.0},
-      .color = BLUE // Default color
-    },
-    rbvs::ModelPrimitive{
-      .position = {0.0, -6.0, 0.0},
-      .type = rbvs::ModelPrimitiveType::CYLINDER,
-      .radius = 0.5,
-      .height = 5.0,
-      .color = GREEN // Default color
-    }
-  });
+  std::vector<rbvs::ModelPrimitive> reference_frame_primitives;
 
-  rbvs::Entity custom = visualizer.create_model(rbvs::ModelParams{
-      .position = {1.0, 1.0, 1.0},
-      .color = WHITE,
-      .model_type = rbvs::ModelType::CUSTOM,
-      .custom_model_key = "customModel"
-      
-  });
+  Color colors[3] = {RED, GREEN, BLUE};
+
+  Quaternion orientations[3] = {
+      QuaternionFromEuler(0, 0, -PI / 2), // X axis
+      QuaternionIdentity(),               // Y axis
+      QuaternionFromEuler(PI / 2, 0, 0)   // Z axis
+  };
+
+  Vector3 axes[3] = {
+      {1.0f, 0.0f, 0.0f}, // X
+      {0.0f, 1.0f, 0.0f}, // Y
+      {0.0f, 0.0f, 1.0f}  // Z
+  };
+
+  for (int i = 0; i < 3; i++)
+  {
+    // Position so that base of cylinder is at origin
+    rbvs::ModelPrimitive cylinder = {.orientation = orientations[i],
+                                     .type = rbvs::ModelPrimitiveType::CYLINDER,
+                                     .radius = cylinder_radius,
+                                     .height = cylinder_length,
+                                     .color = colors[i]};
+
+    // Position cone tip after cylinder
+    Vector3 tip_pos = axes[i] * cylinder_length;
+    rbvs::ModelPrimitive cone = {.position = tip_pos,
+                                 .orientation = orientations[i],
+                                 .type = rbvs::ModelPrimitiveType::CONE,
+                                 .radius = tip_radius,
+                                 .height = tip_height,
+                                 .color = colors[i]};
+
+    reference_frame_primitives.push_back(cylinder);
+    reference_frame_primitives.push_back(cone);
+  }
+
+  reference_frame_primitives.push_back({.type = rbvs::SPHERE,
+                                        .radius = cylinder_radius * 1.15f,
+                                        .color = WHITE});
+
+  visualizer.register_model("customModel", reference_frame_primitives);
+
+  rbvs::Entity custom = visualizer.create_model(
+      rbvs::ModelParams{.position = {1.0, 1.0, 1.0},
+                        .color = WHITE,
+                        .model_type = rbvs::ModelType::CUSTOM,
+                        .custom_model_key = "customModel",
+                        .receive_lighting = false
+
+      });
 
   // Define the sphere
   Vector3 new_pos = {0.0f, 0.0f, 0.0f};
@@ -207,7 +239,9 @@ int main() {
   // Main game loop
   float t_o = GetTime();
   bool latch = false;
-  while (!WindowShouldClose()) {
+  bool recive_light = true;
+  while (!WindowShouldClose())
+  {
 
     // Update the visualizer
     visualizer.update();
@@ -264,6 +298,17 @@ int main() {
 
     // visualizer.update_visual_object_position_orientation(cube_id, new_pos,
     // new_orientation);
+
+
+    if ((GetTime() - t_o) > 0.5)
+    {
+        visualizer.update_model(rbvs::ModelUpdateParams{
+            .entity = custom,
+            .receive_lighting = !recive_light
+        });
+        recive_light = !recive_light;
+        t_o = GetTime();
+    }
   }
 
   // De-initialize

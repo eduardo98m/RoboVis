@@ -20,19 +20,19 @@ include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-include_directories("src" 
-                    "thirdParty/rlImGui" 
-                    "thirdParty/imgui-filebrowser" 
-                    "thirdParty/imgui" 
+include_directories("src"
+                    "thirdParty/rlImGui"
+                    "thirdParty/imgui-filebrowser"
+                    "thirdParty/imgui"
                     "thirdParty/rlights"
                     "thirdParty/raylib-gizmo/src"
                     "thirdParty/tinyxml2"
                     )
 
-SET(RLIGHTS_SOURCES
+set(RLIGHTS_SOURCES
     thirdParty/rlights/rlights.cpp)
 
-SET(TINYXML2_SOURCES
+set(TINYXML2_SOURCES
     thirdParty/tinyxml2/tinyxml2.cpp)
 
 
@@ -58,6 +58,8 @@ set(SYSTEMS_SOURCES
     "src/Systems/Rendering/GUIRendering.cpp"
     "src/Systems/Rendering/HeightMapRendering.cpp"
     "src/Systems/Rendering/MapRendering.cpp"
+    "src/Systems/Rendering/Lightning.cpp"
+
     "src/Systems/GUI/EntitySettings.cpp"
     "src/Systems/Rendering/ShaderManager.cpp"
     "src/Systems/GizmoInteraction.cpp"
@@ -66,12 +68,10 @@ set(SYSTEMS_SOURCES
     "src/Systems/Serialization.cpp"
 )
 
-
 set(ECS_SOURCES
     "src/ECS/EntityManager.cpp"
     "src/ECS/ComponentType.cpp"
 )
-
 
 set(API_SOURCES
     "src/API/ModelAPI.cpp"
@@ -80,9 +80,8 @@ set(API_SOURCES
     "src/API/HeightMapAPI.cpp"
     "src/API/GUIAPI.cpp"
     "src/API/MapAPI.cpp"
+    "src/API/LightAPI.cpp"
 )
-
-
 
 set(SOURCES
     "src/VisualizerNew.cpp"
@@ -90,7 +89,6 @@ set(SOURCES
 
 set(RAYLIB_GIZMO_SOURCES
     "thirdParty/raylib-gizmo/src/raygizmo.c")
-
 
 set(EXAMPLE_SOURCES
     examples/SpringMassSimulation.cpp
@@ -107,26 +105,26 @@ add_compile_definitions(SHADER_BASE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/shaders")
 
 add_library(${PROJECT_NAME}
             ${SOURCES}
-            ${ECS_MAIN} 
-            ${ECS_SOURCES} 
-            ${API_SOURCES} 
-            ${SYSTEMS_SOURCES} 
+            ${ECS_MAIN}
+            ${ECS_SOURCES}
+            ${API_SOURCES}
+            ${SYSTEMS_SOURCES}
             ${IMGUI_SOURCES}
-            ${TINYXML2_SOURCES} 
-            ${RAYMGUI_SOURCES} 
+            ${TINYXML2_SOURCES}
+            ${RAYMGUI_SOURCES}
             ${RLIGHTS_SOURCES}
             ${RAYLIB_GIZMO_SOURCES})
 
 
-add_executable(SpringMassSimulation 
-                ${ECS_MAIN} 
-                ${ECS_SOURCES} 
-                ${API_SOURCES} 
-                ${SYSTEMS_SOURCES} 
-                ${SOURCES} 
-                ${IMGUI_SOURCES} 
+add_executable(SpringMassSimulation
+                ${ECS_MAIN}
+                ${ECS_SOURCES}
+                ${API_SOURCES}
+                ${SYSTEMS_SOURCES}
+                ${SOURCES}
+                ${IMGUI_SOURCES}
                 ${TINYXML2_SOURCES}
-                ${RAYMGUI_SOURCES} 
+                ${RAYMGUI_SOURCES}
                 ${RLIGHTS_SOURCES}
                 ${RAYLIB_GIZMO_SOURCES})
 

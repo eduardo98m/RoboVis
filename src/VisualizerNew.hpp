@@ -19,13 +19,14 @@
 // Internal - API
 #include "API/Gizmo.hpp"
 #include "API/HeightMap.hpp"
+#include "API/Light.hpp"
 #include "API/Map.hpp"
 #include "API/Model.hpp"
 #include "API/PointCloud.hpp"
 
 namespace rbvs {
 class Visualizer {
-private:
+public:
   EntityManager entity_manager;
   RenderingSystem rendering_system;
   EntitySelectionSystem entity_selection_system;
@@ -43,7 +44,8 @@ private:
   void set_up_camera(void);
   void pre_load_meshes(void);
 
-public:
+  // We let the entity manager to be public
+
   Visualizer(int screen_width, int screen_height, const char *title);
 
   ~Visualizer();
@@ -71,7 +73,7 @@ public:
   bool add_gui(std::string name, std::function<void(void)> gui_function);
 
   /**
-   * @brief Unregisters a GUI rendering function previously added with
+   * @brief Removes a GUI rendering function previously added with
    * `add_gui`.
    *
    * The function identified by the given name will be removed from the
@@ -97,7 +99,17 @@ public:
    * to the GPU), and use it later (as many times at he wants)
    */
   void register_model(std::string model_name,
-                      std::initializer_list<ModelPrimitive> primitives);
+                      std::vector<ModelPrimitive> primitives);
+
+  /**
+   * @brief Adds a light to the Visualizer
+   */
+  Entity create_light(LightParams params);
+
+  /**
+   * @brief Updates a light
+   */
+  void update_light(LightUpdateParams params);
 
   template <typename PointT>
   Entity create_point_cloud(PointCloudParams<PointT> params);

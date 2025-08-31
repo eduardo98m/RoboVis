@@ -1,33 +1,31 @@
 
 #include "Systems/Rendering/VisualModelRendering.hpp"
+#include "Components/Base.hpp"
 
 namespace rbvs
 {
-    void VisualModelRenderingSystem::update(EntityManager &em)
+  void VisualModelRenderingSystem::update(EntityManager &em,
+                                          Camera3D camera)
+  {
+    auto view = em.view<VisualModel>();
+
+    for (auto entity : view)
     {
-        auto view = em.view<VisualModel>();
+      auto &vm = em.getComponent<VisualModel>(entity);
+      if (!vm.visible)
+        continue;
 
-        for (auto entity : view)
-        {
+      Vector3 axis;
+      float angle;
+      QuaternionToAxisAngle(vm.orientation, &axis, &angle);
 
-            auto &vm = em.getComponent<VisualModel>(entity);
+      if (vm.color.a < 255)
+        rlDisableDepthMask();
 
-            if (!vm.visible)
-                continue;
+      DrawModelEx(*vm.model, vm.position, axis, angle, vm.scale, vm.color);
 
-            Vector3 axis;
-            float angle;
-            QuaternionToAxisAngle(vm.orientation, &axis, &angle);
-
-            // Disable the depth mask for transparent models
-            if (vm.color.a < 255)rlDisableDepthMask();
-            DrawModelEx(*vm.model,
-                        vm.position,
-                        axis,
-                        angle,
-                        vm.scale,
-                        vm.color);
-            rlEnableDepthMask();
-        }
+      rlEnableDepthMask();
     }
-}
+  }
+
+} // namespace rbvs
