@@ -103,24 +103,22 @@ int main()
       .color = {.r = 0, .g = 255, .b = 58, .a = 75},
   });
 
-  rbvs::Entity light =
-      visualizer.create_light({.position = {0.0, 0.0, 10},
-                               .direction = {0.0, 0.0, -1.0},
-                               .type = rbvs::LightType::POINT,
-                               .intensity = 1.0});
-  
-  for (int i = 0; i < 20; ++i){
-    for (int j = 0; j < 20; ++j){
-      visualizer.create_light({.position = {static_cast<float>(i), static_cast<float>(j), 2.0},
-                              //  .direction = {0.0, 0.0, -1.0},
-                               .type = rbvs::LightType::POINT,
-                               .intensity = 1.0});
-  }
-  }
+  // visualizer.create_light({.position = {0.0, 3.0, 0.0},
+  //                          .type = rbvs::LightType::POINT,
+  //                          .intensity = 1.0});
+  // for (int i = 0; i < 20; ++i){
+  //   for (int j = 0; j < 20; ++j){
+  //     visualizer.create_light({.position = {static_cast<float>(i),
+  //     static_cast<float>(j), 2.0},
+  //                             //  .direction = {0.0, 0.0, -1.0},
+  //                              .type = rbvs::LightType::POINT,
+  //                              .intensity = 1.0});
+  // }
+  // }
 
   rbvs::Entity cylinder_entity = visualizer.create_model(rbvs::ModelParams{
       .position = {1.0, 0.0, 1.0},
-      .color = {255, 0, 0, 255},
+      .color = ORANGE,
       .model_type = rbvs::ModelType::CYLINDER,
       .radius = 0.1,
       .length = 5.0,
@@ -136,7 +134,7 @@ int main()
 
   visualizer.create_model(rbvs::ModelParams{
       .position = {-1.0, 0.0, -1.0},
-      .color = {255, 0, 0, 255},
+      .color = GREEN,
       .model_type = rbvs::ModelType::CYLINDER,
       .radius = 0.1,
       .length = 5.0,
@@ -144,11 +142,25 @@ int main()
 
   visualizer.create_model(rbvs::ModelParams{
       .position = {-1.0, 0.0, 1.0},
-      .color = {255, 0, 0, 255},
+      .color = BLUE,
       .model_type = rbvs::ModelType::CYLINDER,
       .radius = 0.1,
       .length = 5.0,
   });
+
+  visualizer.create_model(
+      rbvs::ModelParams{.position = {0.0, 0.0, 0.0},
+                        .color = {255, 0, 0, 255},
+                        .model_type = rbvs::ModelType::BOX,
+                        .half_extents = {25.0, 0.05, 25.0}});
+  
+
+  visualizer.create_model(
+      rbvs::ModelParams{.position = {0.0, 0.0, 0.0},
+                        .color = {255, 0, 0, 255},
+                        .model_type = rbvs::ModelType::CYLINDER,
+                        .radius = 25.0,
+                        .length = 0.05});
 
   // rbvs::Entity cone_entity = visualizer.create_model(rbvs::ModelParams{
   //     .position = {4.0, 0.0, 2.0},
@@ -229,6 +241,21 @@ int main()
 
       });
 
+  // Create the light
+  Vector3 light_pos = {10.0f, 10.0f, 10.0f};
+  rbvs::Entity light = visualizer.create_light({.position = light_pos,
+                                                .target = {0.0, 0.0, 0.0},
+                                                .type = rbvs::LightType::DIRECTIONAL,
+                                                .intensity = 1.0f});
+
+  // Create the arrow model instance
+  rbvs::Entity light_arrow = visualizer.create_model({
+      .position = light_pos,
+      .color = WHITE,
+      .model_type = rbvs::ModelType::SPHERE,
+      .radius = 0.1
+  });
+
   // Define the sphere
   Vector3 new_pos = {0.0f, 0.0f, 0.0f};
   Vector3 new_scale = {1.0f, 1.0f, 1.0f};
@@ -299,15 +326,12 @@ int main()
     // visualizer.update_visual_object_position_orientation(cube_id, new_pos,
     // new_orientation);
 
-
     if ((GetTime() - t_o) > 0.5)
     {
-        visualizer.update_model(rbvs::ModelUpdateParams{
-            .entity = custom,
-            .receive_lighting = !recive_light
-        });
-        recive_light = !recive_light;
-        t_o = GetTime();
+      visualizer.update_model(rbvs::ModelUpdateParams{
+          .entity = custom, .receive_lighting = !recive_light});
+      recive_light = !recive_light;
+      t_o = GetTime();
     }
   }
 

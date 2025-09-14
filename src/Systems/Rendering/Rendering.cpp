@@ -1,6 +1,8 @@
 #include "Systems/Rendering/Rendering.hpp"
 #include "Systems/Rendering/GUIRendering.hpp"
+#include "imgui.h"
 #include "rlImGui.h"
+#include <raylib.h>
 
 namespace rbvs {
 
@@ -9,6 +11,7 @@ void RenderingSystem::init(void) {
   point_cloud_renderer.load_shader();
   height_map_rendering.load_shader();
   lighting_system.init();
+  shadow_map_system.init();
 }
 
 void RenderingSystem::update(
@@ -17,6 +20,7 @@ void RenderingSystem::update(
 
   BeginDrawing();
   ClearBackground({30, 30, 30, 255});
+  shadow_map_system.update(em, camera, lighting_system.lit_shader());
   BeginMode3D(camera);
 
   shader_manager_system.render_grid_shader(camera);
@@ -27,9 +31,11 @@ void RenderingSystem::update(
   map_renderer.update(em, camera);
   gizmo_renderer.update(em);
 
+  rlActiveTextureSlot(1);
+  rlDisableTexture();
+
   EndMode3D();
   rlImGuiBegin();
-  // processUI(em);
   entity_setting_system.render_gui(em);
 
   // User defined imgui interfaces
@@ -37,6 +43,11 @@ void RenderingSystem::update(
 
   // Setings for the gizmos
   gizmo_renderer.render_settings_gui();
+
+  // Check for the rendering system
+  ImGui::Begin("Shadow Map Texture Vis");
+  rlImGuiImage(&this->shadow_map_system.shadow_map.depth);
+  ImGui::End();
 
   rlImGuiEnd();
   EndDrawing();

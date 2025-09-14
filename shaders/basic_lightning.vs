@@ -10,12 +10,16 @@ in vec4 vertexColor;
 uniform mat4 mvp;
 uniform mat4 matModel;
 uniform mat4 matNormal;
+uniform mat4 matLightVP;
 
 // Output vertex attributes (to fragment shader)
 out vec3 fragPosition;
 out vec2 fragTexCoord;
 out vec4 fragColor;
 out vec3 fragNormal;
+
+out vec2 fragShadowTexCoord;
+out float fragShadowDepth;
 
 void main()
 {
@@ -27,4 +31,12 @@ void main()
 
     // Calculate final vertex position
     gl_Position = mvp*vec4(vertexPosition, 1.0);
+
+    vec4 worldSpace = matModel*vec4(vertexPosition, 1.0); 
+    vec4 screenSpace = matLightVP*worldSpace;
+
+    vec3 ndc = screenSpace.xyz / screenSpace.w; // Normalized Device Coords
+    fragShadowDepth = ndc.z * 0.5 + 0.5;
+    fragShadowTexCoord = ndc.xy * 0.5 + 0.5;
+
 }

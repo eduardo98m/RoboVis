@@ -8,7 +8,7 @@ namespace rbvs {
 Entity Visualizer::create_light(LightParams params) {
 
   Light light = {.position = params.position,
-                 .direction = params.direction,
+                 .target = params.target,
                  .type = params.type,
                  .color = params.color,
                  .intensity = params.intensity,
@@ -26,8 +26,8 @@ void Visualizer::update_light(LightUpdateParams params) {
 
   if (params.position)
     lg.position = *params.position;
-  if (params.direction)
-    lg.direction = *params.direction;
+  if (params.target)
+    lg.target = *params.target;
   if (params.type)
     lg.type = *params.type;
   if (params.color)

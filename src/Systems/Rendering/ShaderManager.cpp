@@ -10,10 +10,11 @@ namespace rbvs
     {
         std::string vs_path = std::string(SHADER_BASE_PATH) + "/grid.vs";
         std::string fs_path = std::string(SHADER_BASE_PATH) + "/grid.fs";
-        std::cout << "Shader loaded\n";
+
 
         this->grid_shader = LoadShader(TextFormat(vs_path.c_str(), GLSL_VER), TextFormat(fs_path.c_str(), GLSL_VER));
-
+        TraceLog(LOG_INFO, "GRID SHADER LOADED");
+        
         Mesh plane_mesh = GenMeshPlane(2.0f, 2.0f, 1, 1); // 2x2 size, 1x1 segments
         plane_model = LoadModelFromMesh(plane_mesh);
         plane_model.materials[0].shader = grid_shader;

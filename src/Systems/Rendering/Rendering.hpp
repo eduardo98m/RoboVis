@@ -7,8 +7,10 @@
 #include "Systems/Rendering/MapRendering.hpp"
 #include "Systems/Rendering/PointCloudRendering.hpp"
 #include "Systems/Rendering/ShaderManager.hpp"
+#include "Systems/Rendering/ShadowMapRendering.hpp"
 #include "Systems/Rendering/VisualModelRendering.hpp"
 
+#include <raylib.h>
 #include <raymath.h>
 #include <rlgl.h>
 
@@ -33,6 +35,7 @@ public:
   GizmoRenderingSystem gizmo_renderer;
   MapRenderingSystem map_renderer;
   LightingSystem lighting_system;
+  ShadowMapRenderingSystem shadow_map_system;
 
   ShaderManagerSystem shader_manager_system = ShaderManagerSystem();
 };

@@ -59,6 +59,7 @@ set(SYSTEMS_SOURCES
     "src/Systems/Rendering/HeightMapRendering.cpp"
     "src/Systems/Rendering/MapRendering.cpp"
     "src/Systems/Rendering/Lightning.cpp"
+    "src/Systems/Rendering/ShadowMapRendering.cpp"
 
     "src/Systems/GUI/EntitySettings.cpp"
     "src/Systems/Rendering/ShaderManager.cpp"

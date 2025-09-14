@@ -12,7 +12,7 @@
 namespace rbvs {
 struct LightParams {
   Vector3 position = {0.0, 0.0, 0.0};
-  Vector3 direction = {1.0, 0.0, 0.0};
+  Vector3 target = {0.0, 0.0, 0.0};
   LightType type = LightType::DIRECTIONAL;
   Color color = WHITE;
   float intensity = 1.0;
@@ -24,7 +24,7 @@ struct LightParams {
 struct LightUpdateParams {
   Entity entity; // Entity with the light to update
   std::optional<Vector3> position{};
-  std::optional<Vector3> direction{};
+  std::optional<Vector3> target{};
   std::optional<LightType> type{};
   std::optional<Color> color{};
   std::optional<float> intensity{};
