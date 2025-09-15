@@ -46,7 +46,7 @@ struct Light {
     float cutoff;       // 4 bytes (para spot lights)
     float outerCutoff;  // 4 bytes
     float padding3;     // 4 bytes - completar a múltiplo de 16
-    // Total: 80 bytes por light (múltiplo de 16)
+    // Total: 80 bytes por light ( 5 x 16)
 };
 
 
@@ -113,31 +113,129 @@ vec3 calculateSpotLight(const Light light, vec3 fragPos, vec3 normal, vec3 viewD
     return (diffuse * objectColor) + specular;
 }
 
-float calculateShadowPCF(vec2 shadowCoord, float currentDepth) {
+float calculateShadowPCFPoisson(vec2 shadowCoord, float currentDepth, float bias) {
+    // Poisson disk samples for better distribution than grid sampling
+    vec2 poissonDisk[16] = vec2[](
+        vec2(-0.94201624, -0.39906216),
+        vec2(0.94558609, -0.76890725),
+        vec2(-0.094184101, -0.92938870),
+        vec2(0.34495938, 0.29387760),
+        vec2(-0.91588581, 0.45771432),
+        vec2(-0.81544232, -0.87912464),
+        vec2(-0.38277543, 0.27676845),
+        vec2(0.97484398, 0.75648379),
+        vec2(0.44323325, -0.97511554),
+        vec2(0.53742981, -0.47373420),
+        vec2(-0.26496911, -0.41893023),
+        vec2(0.79197514, 0.19090188),
+        vec2(-0.24188840, 0.99706507),
+        vec2(-0.81409955, 0.91437590),
+        vec2(0.19984126, 0.78641367),
+        vec2(0.14383161, -0.14100790)
+    );
+    
     float shadow = 0.0;
-    // The size of the grid we sample. A larger size gives softer shadows but is more expensive.
-    int pcfSamples = 3; 
-    // How far apart the samples are. This controls the "spread" of the softness.
-    float texelSize = 1.0 / textureSize(shadowMapTex, 0).x;
-    float spread = texelSize * 1.5;
-
-    for (int x = -pcfSamples; x <= pcfSamples; x++) {
-        for (int y = -pcfSamples; y <= pcfSamples; y++) {
-            // Get the depth from the shadow map at the offset coordinate
-            float pcfDepth = texture(shadowMapTex, shadowCoord + vec2(x, y) * spread).r; 
-            
-            // Add to the average if the fragment is not in shadow
-            // The bias (0.001) is still important here to prevent shadow acne
-            if (currentDepth - 0.001 < pcfDepth) {
-                shadow += 1.0;
-            }
+    vec2 texelSize = 1.0 / textureSize(shadowMapTex, 0);
+    
+    // Sample multiple points using Poisson disk
+    for(int i = 0; i < 16; i++) {
+        vec2 sampleCoord = shadowCoord + poissonDisk[i] * texelSize * 2.0;
+        float pcfDepth = texture(shadowMapTex, sampleCoord).r;
+        
+        if(currentDepth - bias < pcfDepth) {
+            shadow += 1.0;
         }
     }
     
-    // Divide by the total number of samples to get the average (a value between 0.0 and 1.0)
-    int totalSamples = (2 * pcfSamples + 1) * (2 * pcfSamples + 1);
-    return shadow / float(totalSamples);
+    return shadow / 16.0;
 }
+
+
+// PCSS (Percentage Closer Soft Shadows) - even better quality but more expensive
+float calculateShadowPCSS(vec2 shadowCoord, float currentDepth, vec3 lightDir) {
+    vec2 texelSize = 1.0 / textureSize(shadowMapTex, 0);
+    
+    // Step 1: Find average blocker depth
+    float searchRadius = 5.0 * texelSize.x;
+    float blockerDepthSum = 0.0;
+    float blockerCount = 0.0;
+    
+    for(int i = 0; i < 16; i++) {
+        vec2 poissonDisk[16] = vec2[](
+            vec2(-0.94201624, -0.39906216),
+            vec2(0.94558609, -0.76890725),
+            vec2(-0.094184101, -0.92938870),
+            vec2(0.34495938, 0.29387760),
+            vec2(-0.91588581, 0.45771432),
+            vec2(-0.81544232, -0.87912464),
+            vec2(-0.38277543, 0.27676845),
+            vec2(0.97484398, 0.75648379),
+            vec2(0.44323325, -0.97511554),
+            vec2(0.53742981, -0.47373420),
+            vec2(-0.26496911, -0.41893023),
+            vec2(0.79197514, 0.19090188),
+            vec2(-0.24188840, 0.99706507),
+            vec2(-0.81409955, 0.91437590),
+            vec2(0.19984126, 0.78641367),
+            vec2(0.14383161, -0.14100790)
+        );
+        
+        vec2 sampleCoord = shadowCoord + poissonDisk[i] * searchRadius;
+        float sampleDepth = texture(shadowMapTex, sampleCoord).r;
+        
+        if(sampleDepth < currentDepth) {
+            blockerDepthSum += sampleDepth;
+            blockerCount += 1.0;
+        }
+    }
+    
+    if(blockerCount == 0.0) {
+        return 1.0; // No blockers found
+    }
+    
+    float avgBlockerDepth = blockerDepthSum / blockerCount;
+    
+    // Step 2: Calculate penumbra size
+    float lightSize = 0.05; // Adjust this for light size
+    float penumbraSize = (currentDepth - avgBlockerDepth) / avgBlockerDepth * lightSize;
+    
+    // Step 3: PCF with variable filter size
+    float shadow = 0.0;
+    float filterRadius = penumbraSize * texelSize.x;
+    
+    for(int i = 0; i < 16; i++) {
+        vec2 poissonDisk[16] = vec2[](
+            vec2(-0.94201624, -0.39906216),
+            vec2(0.94558609, -0.76890725),
+            vec2(-0.094184101, -0.92938870),
+            vec2(0.34495938, 0.29387760),
+            vec2(-0.91588581, 0.45771432),
+            vec2(-0.81544232, -0.87912464),
+            vec2(-0.38277543, 0.27676845),
+            vec2(0.97484398, 0.75648379),
+            vec2(0.44323325, -0.97511554),
+            vec2(0.53742981, -0.47373420),
+            vec2(-0.26496911, -0.41893023),
+            vec2(0.79197514, 0.19090188),
+            vec2(-0.24188840, 0.99706507),
+            vec2(-0.81409955, 0.91437590),
+            vec2(0.19984126, 0.78641367),
+            vec2(0.14383161, -0.14100790)
+        );
+        
+        vec2 sampleCoord = shadowCoord + poissonDisk[i] * filterRadius;
+        float pcfDepth = texture(shadowMapTex, sampleCoord).r;
+        
+        float bias = max(0.005 * (1.0 - dot(normalize(fragNormal), lightDir)), 0.001);
+        
+        if(currentDepth - bias < pcfDepth) {
+            shadow += 1.0;
+        }
+    }
+    
+    return shadow / 16.0;
+}
+
 
 void main() {
     vec4 texelColor = texture(texture0, fragTexCoord);
@@ -193,14 +291,12 @@ void main() {
         }
 
         float nl = max(dot(normal, lightDirForBias), 0.0);
-        // bias grows when angle is grazing (small dot) — tune these constants if needed
         float bias = max(0.002 * (1.0 - nl), 0.0005);
 
-        // Use PCF to compute how much is lit (your calculateShadowPCF returns fraction lit)
-        shadow = calculateShadowPCF(fragShadowTexCoord, fragShadowDepth - bias);
+        shadow = calculateShadowPCFPoisson(fragShadowTexCoord, fragShadowDepth, bias);
+        
         shadow = clamp(shadow, 0.0, 1.0);
     } else {
-        // outside shadow map: treat as lit to avoid ghost shadows
         shadow = 1.0;
     }
 
