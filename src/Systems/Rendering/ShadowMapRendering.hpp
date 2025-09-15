@@ -19,10 +19,10 @@ public:
   Shader shadow_shader;
   ShadowMapGPUUniforms shadow_shader_uniforms;
 
-  int shadow_map_resolution = 2048; // Súbelo aquí para más calidad (ej: 1024, 2048, 4096)
-  float shadow_ortho_size = 40.0f;
+  int shadow_map_resolution = 8000; // Quality of the shadows
+  float shadow_ortho_size = 50.0f; // Less s
   float shadow_near = 0.1f;
-  float shadow_far = 100.0f;
+  float shadow_far = 50.0f;
 
   
   void init();

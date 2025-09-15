@@ -24,7 +24,12 @@ Camera3D ShadowMapRenderingSystem::create_light_camera(const Light &light) {
     lightCam.position = light.position;
     lightCam.target = light.target; // Look at origin (or adjust based on your scene)
     lightCam.projection = CAMERA_ORTHOGRAPHIC;
-    lightCam.up = (Vector3){0.0f, 1.0f, 0.0f};
+    Vector3 lightDir = Vector3Normalize(Vector3Subtract(light.target, light.position));
+    Vector3 up = {0.0f, 1.0f, 0.0f};
+    if (fabsf(Vector3DotProduct(up, lightDir)) > 0.99f) {
+        up = {1.0f, 0.0f, 0.0f};
+    }
+    lightCam.up = up;
     // lightCam.fovy = shadow_ortho_size; // This controls the size of the
     //                                    // orthographic projection
     break;
@@ -104,11 +109,19 @@ RenderTexture2D ShadowMapRenderingSystem::load_shadow_map(int width,
         PIXELFORMAT_UNCOMPRESSED_R32; // DEPTH_COMPONENT_24BIT?
     target.depth.mipmaps = 1;
 
+    // Filterign is not necessary but makes the shadow look better
+    rlTextureParameters(target.depth.id, RL_TEXTURE_MIN_FILTER, RL_TEXTURE_FILTER_LINEAR);
+    rlTextureParameters(target.depth.id, RL_TEXTURE_MAG_FILTER, RL_TEXTURE_FILTER_LINEAR);
+    
+    rlTextureParameters(target.depth.id, RL_TEXTURE_WRAP_S, RL_TEXTURE_WRAP_CLAMP);
+    rlTextureParameters(target.depth.id, RL_TEXTURE_WRAP_T, RL_TEXTURE_WRAP_CLAMP);
+    
+
     rlFramebufferAttach(target.id, target.texture.id,
                         RL_ATTACHMENT_COLOR_CHANNEL0, RL_ATTACHMENT_TEXTURE2D,
                         0);
     rlFramebufferAttach(target.id, target.depth.id, RL_ATTACHMENT_DEPTH,
-                        RL_ATTACHMENT_TEXTURE2D, 0);
+                        RL_ATTACHMENT_TEXTURE2D, 0);                      
     rlDisableFramebuffer();
   }
   return target;
