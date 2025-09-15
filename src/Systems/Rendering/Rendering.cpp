@@ -44,11 +44,6 @@ void RenderingSystem::update(
   // Setings for the gizmos
   gizmo_renderer.render_settings_gui();
 
-  // Check for the rendering system
-  ImGui::Begin("Shadow Map Texture Vis");
-  rlImGuiImage(&this->shadow_map_system.shadow_map.depth);
-  ImGui::End();
-
   rlImGuiEnd();
   EndDrawing();
 }
